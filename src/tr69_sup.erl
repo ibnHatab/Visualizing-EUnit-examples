@@ -1,5 +1,5 @@
 
--module(tr_sup).
+-module(tr69_sup).
 
 -behaviour(supervisor).
 

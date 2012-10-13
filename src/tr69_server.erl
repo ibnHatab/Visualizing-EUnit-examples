@@ -6,7 +6,7 @@
 %%% @end
 %%% Created :  7 Jul 2012 by vlad <lib.aca55a@gmail.com>
 %%%-------------------------------------------------------------------
--module(tr_server).
+-module(tr69_server).
 
 -behaviour(gen_server).
 

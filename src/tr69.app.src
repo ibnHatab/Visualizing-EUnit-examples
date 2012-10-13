@@ -1,4 +1,4 @@
-{application, tr,
+{application, tr69,
  [
   {description, ""},
   {vsn, "1"},
@@ -7,6 +7,6 @@
                   kernel,
                   stdlib
                  ]},
-  {mod, { tr_app, []}},
+  {mod, { tr69_app, []}},
   {env, []}
  ]}.
