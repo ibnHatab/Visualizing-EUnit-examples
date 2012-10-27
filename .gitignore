@@ -3,6 +3,9 @@ ebin/
 .eunit/
 *beam
 
+log/*	      
 logs/*
+deps/*
 
+erl_crash.dump
 test.spec
