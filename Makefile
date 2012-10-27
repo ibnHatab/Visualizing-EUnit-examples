@@ -1,11 +1,16 @@
 
-APP := TR069
+APP := tr69
+VSN = $(shell sed -n 's/.*{vsn,.*"\(.*\)"}.*/\1/p' src/$(APP).app.src)
+
 REBAR='./rebar'
 
 all: compile
 
-compile:
+compile: deps
 	$(REBAR) -v compile
+
+app:
+	@./rebar compile skip_deps=true
 
 deps:
 	$(REBAR) check-deps || $(REBAR) get-deps
@@ -22,6 +27,12 @@ docs:
 
 utest:
 	$(REBAR) -v eunit skip_deps=true suite=tr_soap_types
+
+webstart: app
+	exec erl -pa $(PWD)/ebin -pa $(PWD)/deps/*/ebin 	\
+		-boot start_sasl 		\
+		-s lager -s tr69	 					\
+		|| echo Exit
 
 
 .PHONY: ctest
