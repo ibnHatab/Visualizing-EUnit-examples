@@ -1,9 +1,9 @@
 ebin/
 *~
-.eunit/
 *beam
 
-log/*	      
+.eunit/
+log/
 logs/*
 deps/*
 
