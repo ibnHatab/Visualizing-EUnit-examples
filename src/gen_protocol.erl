@@ -19,27 +19,27 @@
 
 -export_type([protocol/0, session/0]).
 
-%%% Protocol Object methods
+%% Protocol Object methods
 
 %% create_protocol
-%% This method coinside with <service>:start_link(Config).
+%% @doc This method initialize protocol.
 -callback create_protocol(Config :: term()) ->
-    {ok, protocol()} | {error, Reason :: term()}.
+    {ok, Config :: term()} | {error, Reason :: term()}.
 
 %% open
 %% Active open on protocol object
 -callback open(InvokingProtocol :: protocol(),
-	       ParticipandSet :: {Controll :: protocol(), Data :: protocol()}) ->
+	       ParticipandSet :: list()) ->
     {ok, session()} | {error, Reason :: term()}.
 
 %% open_enable
-%% Request for passive open on low-level protocol object
+%% @doc Request for passive open on low-level protocol object
 -callback open_enable(InvokingProtocol :: protocol(),
-		      ParticipandSet :: {Controll :: protocol(), Data :: protocol()}) ->
+		      ParticipandSet :: list()) ->
     ok | {error, Reason :: term()}.
 
 %% open_done
-%% Response for passive open on high-level protocol object
+%% @doc Async response for passive open on high-level protocol object
 -callback open_done(InvokingProtocol :: protocol(),
-		    ParticipandSet :: {Controll :: protocol(), Data :: protocol()}) ->
+		    ParticipandSet :: list()) ->
     {ok, session()} | {error, Reason :: term()}.

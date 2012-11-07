@@ -28,5 +28,3 @@
 -callback pop(Message :: term()) ->
     ok | {error, Reason :: term()}.
 
-
-%% FIXME: implement demuxer callback 
