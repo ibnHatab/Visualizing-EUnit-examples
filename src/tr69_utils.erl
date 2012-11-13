@@ -26,6 +26,7 @@ is_arch (Arch) -> throw({unsupported_architecture,Arch}).
 %% EUnit tests
 %% ===================================================================
 -ifdef(TEST).
+-include_lib("eunit/include/eunit.hrl").
 
 is_arch_test() ->
     ?assert(is_arch (linux)).
