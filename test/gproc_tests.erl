@@ -37,24 +37,28 @@ gproc_register_test_() ->
       [
        %% register/unregister
        ?_test(begin
-		  gproc:reg({n, l, "nume"}, "Grati")
+		  gproc:reg({n, l, "rpc"}, "Grati")
 	      end),
-       %% set/get properties
        ?_test(begin
 		  Pid = spawn_link(fun() ->
-%%					   B = gproc:reg({n, l, "nume1"}, "Grati"),
+					   B = gproc:reg({n, l, "http"}, "Grati"),
 					   ?DBG(self()),
 					   receive
 					       stop ->						   
 						   ?DBG(stoped)
 					   end
 				   end),
+		  sleep(1000),
+		  ?assertEqual(Pid, gproc:where({n, l, "http"})),
 		  Pid ! stop
 	      end),
+       %% set/get properties
        %% transfer to ptocess
        ?_test(begin
 		  ok
 	      end)       
       ]}.
+
+sleep(T) -> receive after T -> ok end.
 
 -endif.
