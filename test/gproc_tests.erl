@@ -44,7 +44,7 @@ gproc_register_test_() ->
 					   B = gproc:reg({n, l, "http"}, "Grati"),
 					   ?DBG(self()),
 					   receive
-					       stop ->						   
+					       stop ->
 						   ?DBG(stoped)
 					   end
 				   end),
@@ -52,11 +52,67 @@ gproc_register_test_() ->
 		  ?assertEqual(Pid, gproc:where({n, l, "http"})),
 		  Pid ! stop
 	      end),
-       %% set/get properties
-       %% transfer to ptocess
        ?_test(begin
-		  ok
-	      end)       
+		  Pid = spawn_link(fun() ->
+					   receive
+					     register  ->
+						   B = gproc:reg({n, l, "http"}, "Grati"),
+						   ?DBG({wait_register, self()})
+					   end,
+					   receive
+					       stop ->
+						   ?DBG(stoped)
+					   end
+				   end),
+		  Pid ! register,
+		  gproc:await({n, l, "http"}, 1000),
+		  ?assertEqual(Pid, gproc:where({n, l, "http"})),
+		  Pid ! stop
+	      end),
+
+       %% set/get properties
+       ?_test(begin
+		  B = gproc:reg({n, l, "http"}, "Grati"),
+		  ?DBG(self()),
+		  ?assertEqual("Grati", gproc:get_value({n, l, "http"})),
+		  gproc:set_value({n, l, "http"}, "Vlad"),
+		  ?assertEqual("Vlad", gproc:get_value({n, l, "http"}))
+	      end),
+
+       %% transfer to process
+       ?_test(begin
+		  Pid = spawn_link(fun() ->
+					   receive
+					     register  ->
+						   B = gproc:reg({n, l, "cdb"}, "running"),
+						   ?DBG({wait_register, self()})
+					   end,
+					   receive
+					      {transfer, ToPid} ->
+						   gproc:give_away({n, l, "cdb"}, ToPid),
+						   ?DBG({transfer, self(), ToPid}),
+						   ToPid ! tranfer_complete
+					   end,
+					   receive
+					       stop ->
+						   ?DBG(stoped)
+					   end
+				   end),
+		  Pid ! register,
+		  gproc:await({n, l, "cdb"}, 1000),
+		  ?assertEqual(Pid, gproc:where({n, l, "cdb"})),
+		  %% I'm CDB running now !!
+		  Pid ! {transfer, self()},
+		  receive
+		      tranfer_complete ->
+			  ?DBG(tranfer_complete),
+			  ?assertEqual(self(), gproc:where({n, l, "cdb"}))
+		  after 
+		      1000 -> ?assert(false orelse "transfer timeout")
+		  end,
+
+		  Pid ! stop
+	      end)
       ]}.
 
 sleep(T) -> receive after T -> ok end.
