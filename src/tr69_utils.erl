@@ -33,6 +33,7 @@ sleep(T) ->
 %% EUnit tests
 %% ===================================================================
 -ifdef(TEST).
+-include_lib("eunit/include/eunit.hrl").
 
 -include_lib("eunit/include/eunit.hrl").
 
