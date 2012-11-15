@@ -4,7 +4,10 @@
 
 -module(tr69_utils).
 
--export([is_arch/1]).
+-include("tr69.hrl").
+
+-export([is_arch/1, sleep/1]).
+
 
 %% Returns a forced-lowercase architecture for this node
 -spec get_arch () -> string().
@@ -20,6 +23,10 @@ is_arch (solaris) -> is_arch(sunos);
 is_arch (Arch) -> throw({unsupported_architecture,Arch}).
 
 
+sleep(T) ->
+    ?DBG({sleep, T}),
+    receive after T -> ok end.
+
 
 
 %% ===================================================================
@@ -27,7 +34,9 @@ is_arch (Arch) -> throw({unsupported_architecture,Arch}).
 %% ===================================================================
 -ifdef(TEST).
 
-is_arch_test() ->
+-include_lib("eunit/include/eunit.hrl").
+
+is_arch_test_() ->
     ?assert(is_arch (linux)).
 
 -endif.

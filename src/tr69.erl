@@ -11,9 +11,6 @@
 -author('author <author@example.com>').
 -export([start/0, start_link/0, stop/0]).
 
--export([report_event/4,
-	 report_event/5]).
-
 ensure_started(App) ->
     case application:start(App) of
         ok ->
@@ -50,12 +47,4 @@ stop() ->
     application:stop(lager),
     application:stop(sasl),
     Res.
-
-%% ET
-report_event(DetailLevel, FromTo, Label, Contents) ->
-    %% N.B External call
-    ?MODULE:report_event(DetailLevel, FromTo, FromTo, Label, Contents).
-
-report_event(_DetailLevel, _From, _To, _Label, _Contents) ->
-    hopefully_traced.
 

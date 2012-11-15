@@ -2,12 +2,14 @@
 %%% Use is subject to License terms.
 %%%-----------------------------------------------------------------------------
 
-%% Trace macro
+%% Test debug macro
 -ifdef(TEST).
 -define(DBG(ARG), io:format(user, "~n>> ~p: ~p~n", [??ARG, ARG])).
 -else.
 -define(DBG(ARG), true).
 -endif.
+
+%% Lager logging 
 
 -define(DEBUG(Msg),
         ok = lager:debug(Msg)).
@@ -28,6 +30,20 @@
         ok = lager:error(Msg)).
 -define(ERROR(Msg, Args),
         ok = lager:error(Msg, Args)).
+
+%% Various trace macros
+
+-define(report(Severity, Label, Service, Content), 
+	tr69_trace:report_event(Severity, Label, Service, 
+				[{module, ?MODULE}, {line, ?LINE} | Content])).
+-define(report_important(Label, Service, Content), 
+	?report(20, Label, Service, Content)).
+-define(report_verbose(Label, Service, Content),   
+	?report(40, Label, Service, Content)).
+-define(report_debug(Label, Service, Content),     
+	?report(60, Label, Service, Content)).
+-define(report_trace(Label, Service, Content),     
+	?report(80, Label, Service, Content)).
 
 
 -ifndef(TIMEON).
