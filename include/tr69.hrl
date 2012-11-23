@@ -2,6 +2,10 @@
 %%% Use is subject to License terms.
 %%%-----------------------------------------------------------------------------
 
+-ifndef(tr69_hrl).
+-define(tr69_hrl, true).
+
+
 %% Test debug macro
 -ifdef(TEST).
 -define(DBG(ARG), io:format(user, "~n>> ~p: ~p~n", [??ARG, ARG])).
@@ -64,3 +68,5 @@
 		ok = lager:warning("Expecting ~p: ~p at ~p:~p~n", [Msg, ??Cond, ?FILE, ?LINE])
 	end).
 -endif.
+
+-endif. % -ifdef(tr69_hrl).

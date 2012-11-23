@@ -4,9 +4,11 @@ VSN = $(shell sed -n 's/.*{vsn,.*"\(.*\)"}.*/\1/p' src/$(APP).app.src)
 
 REBAR='./rebar'
 
+.PHONY: deps ctest
+
 all: compile
 
-compile: deps
+compile: deps 
 	$(REBAR) -v compile
 
 app:
@@ -37,5 +39,5 @@ webstart: app
 		-boot start_sasl -s lager -s tr69		\
 		|| echo Exit
 
-.PHONY: ctest
+
 
