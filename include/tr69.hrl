@@ -39,7 +39,7 @@
 
 -define(report(Severity, Label, Service, Content), 
 	tr69_trace:report_event(Severity, Label, Service, 
-				[{module, ?MODULE}, {line, ?LINE} | Content])).
+				[{?MODULE, ?LINE} | [Content]])).
 -define(report_important(Label, Service, Content), 
 	?report(20, Label, Service, Content)).
 -define(report_verbose(Label, Service, Content),   
@@ -49,6 +49,17 @@
 -define(report_trace(Label, Service, Content),     
 	?report(80, Label, Service, Content)).
 
+-define(message(Severity, From, To, Label, Content), 
+	tr69_trace:report_event(Severity, From, To, Label, Content)).
+
+%% This part should be redefined in user modules
+-define(SERVICE, otp).
+-define(otpri(Label, Content), ?report_important(Label, ?SERVICE, Content)).
+-define(otprv(Label, Content), ?report_verbose(Label,   ?SERVICE, Content)).
+-define(otprd(Label, Content), ?report_debug(Label,     ?SERVICE, Content)).
+-define(otprt(Label, Content), ?report_trace(Label,     ?SERVICE, Content)).
+
+
 
 -ifndef(TIMEON).
 %% Yes, these need to be on a single line to work...
@@ -57,14 +68,13 @@
 %% ?TIMEOFF(my_code_block).
 
 -define(TIMEON, erlang:put(debug_timer, [now()|case erlang:get(debug_timer) == undefined of true -> []; false -> erlang:get(debug_timer) end])).
--define(TIMEOFF(Var), io:format("~s :: ~10.2f ms : ~p~n", [string:copies(" ", length(erlang:get(debug_timer))), (timer:now_diff(now(), hd(erlang:get(debug_timer)))/1000), Var]), erlang:put(debug_timer, tl(erlang:get(debug_timer)))).
+-define(TIMEOFF(Var), lager:debug("~s :: ~10.2f ms : ~p~n", [string:copies(" ", length(erlang:get(debug_timer))), (timer:now_diff(now(), hd(erlang:get(debug_timer)))/1000), Var]), erlang:put(debug_timer, tl(erlang:get(debug_timer)))).
 
 -define(EXPECT(Cond, Msg),
 	if
 	    Cond ->
 		ok;
 	    true ->
-		%io:format(user, "Expecting ~p: ~p at ~p:~p~n", [Msg, ??Cond, ?FILE, ?LINE]),
 		ok = lager:warning("Expecting ~p: ~p at ~p:~p~n", [Msg, ??Cond, ?FILE, ?LINE])
 	end).
 -endif.
