@@ -66,13 +66,24 @@ deallocate_without_start_test() ->
 allocate_without_start_test() ->
     ?assertError(badarg,allocate()).
 
-
+%% - start deallocate
 start_deallocate_test_() ->
     {setup,
      fun () -> start([1]) end,
      fun(_) -> stop() end,
      fun () ->  
 	     ?assertError({badmatch,{error,not_allocated}}, deallocate(1))
+     end
+    }.
+
+% - start allocate start
+start_after_allocate_test_() ->
+    {setup,
+     fun () -> start([1]) end,
+     fun(_) -> stop() end,
+     fun () ->
+	     ?assertMatch({ok,1},allocate()),
+	     ?assertError(badarg, start([1]))
      end
     }.
 
