@@ -24,8 +24,7 @@ start(ExtraOptions) ->
          {detail_level, 90},
          {trace_pattern, {tr69_trace, max}},
          {trace_global, true},
-         {title, "TR-069 tracer"} | ExtraOptions],
-    %FIXME: property set new actors
+         {title, "CPE tracer"} | ExtraOptions],
     et_viewer:start(Options).
 
 clear(P) ->

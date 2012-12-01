@@ -27,8 +27,14 @@ distclean:
 docs:
 	@erl -noshell -run edoc_run application '$(APP)' '"."' '[]'
 
+SUITE=frequency_tests
 utest:
-	$(REBAR) -v eunit skip_deps=true suite=tr69_trace
+	$(REBAR) -v eunit skip_deps=true suite=$(SUITE)
+
+VISUAL=test/frequency.erl
+vztest: utest
+	VIEWER=firefox fsm_dynamic $(VISUAL) $(PWD)/ebin
+
 
 ctest: 
 	$(REBAR) -v compile ct skip_deps=true suites=tr69_trace case=app_loging_tc
