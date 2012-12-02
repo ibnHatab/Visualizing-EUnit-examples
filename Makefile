@@ -27,9 +27,9 @@ distclean:
 docs:
 	@erl -noshell -run edoc_run application '$(APP)' '"."' '[]'
 
-SUITE=frequency_tests
+SUITE=frequency_eqc
 utest:
-	$(REBAR) -v eunit skip_deps=true suite=$(SUITE)
+	EQC_VIEWER=firefox $(REBAR) -v eunit skip_deps=true suite=$(SUITE)
 
 SUT=test/frequency.erl
 vztest: utest

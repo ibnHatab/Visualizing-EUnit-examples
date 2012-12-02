@@ -40,7 +40,6 @@ call(Message) ->
   end.
 
 %% The Main Loop
-
 loop(Frequencies) ->
   receive
     {request, Pid, allocate} ->
@@ -54,7 +53,6 @@ loop(Frequencies) ->
     {request, Pid, stop} ->
       reply(Pid, ok)
   end.
-
 
 reply(Pid, Reply) ->
   Pid ! {reply, Reply}.

@@ -19,87 +19,101 @@ eqc_test_() ->
     {timeout, 30,
      {spawn, 
       [
-       {timeout, 15, ?_assertEqual(true, eqc_fsm:visualize(?MODULE))}
+       {timeout, 15, ?_assertMatch(_, eqc_fsm:visualize(?MODULE))}
       ]
      }}.
-
 
 %% ===================================================================
 %% FSM
 %% ===================================================================
 
+-define(MAX_FREQ, 3).
+
+-record(freq,{used=[], free=[]}).
+
 initial_state() -> state_init.
 
 state_init(_) ->
-    [{state_error, {call, ?MODULE, allocate, []}},
-     {state_error, {call, ?MODULE, deallocate, [1]}},
-     {state_error, {call, ?MODULE, stop, []}},
-     {started, {call, ?MODULE, start, [[1, 2]]}}].
+    [
+     {{allocated, 0}, {call, ?MODULE, start, [?MAX_FREQ]}},
+     {state_error, {call, ?MODULE, allocate, []}},
+     {state_error, {call, ?MODULE, deallocate, [nat()]}},
+     {state_error, {call, ?MODULE, stop, []}}
+    ].
 
-started(_) ->
-    [{state_init, {call, ?MODULE, stop, []}},
-     {state_error, {call, ?MODULE, deallocate, [1]}},
-     {state_error, {call, ?MODULE, start, [[1, 2]]}},
-     {alloc_1, {call, ?MODULE, allocate, []}}].
-
-alloc_1(_) ->
-    [{state_error, {call, ?MODULE, start, [[1, 2]]}},
-     {alloc_2, {call, ?MODULE, allocate, []}},
-     {started, {call, ?MODULE, deallocate, [oneof([1, 2])]}}].
-
+allocated(N,S) ->
+	[{state_error, {call, ?MODULE, start, [nat()]}}] ++
+	[{state_error, {call, ?MODULE, deallocate, [elements(S#freq.free)]}}
+	  || N == 0] ++
+	[{{allocated, N+1}, {call, ?MODULE, allocate, []}}
+	 || N < ?MAX_FREQ] ++
+	[{state_error, {call, ?MODULE, allocate, []}}
+	 || N == ?MAX_FREQ] ++
+	[{{allocated, N-1}, {call, ?MODULE, deallocate, [elements(S#freq.used)]}}
+	 || N > 0] ++
+	[{state_init, {call, ?MODULE, stop, []}}].
+	
 state_error(_) -> [].
 
-alloc_2(_) ->
-    [{state_init, {call, ?MODULE, stop, []}},
-     {state_error, {call, ?MODULE, start, [[1, 2]]}},
-     {state_error, {call, ?MODULE, allocate, []}},
-     {alloc_1,
-      {call, ?MODULE, deallocate, [oneof([1, 2])]}}].
+%% ===================================================================
+%% PRECONDITION
+%% ===================================================================
 
 precondition(_From, _To, _S, {call, _, allocate, []}) ->
     true;
-precondition(_From, _To, _S,
-	     {call, _, deallocate, [_]}) ->
+precondition(_From, _To, _S, {call, _, deallocate, [_]}) ->
     true;
 precondition(_From, _To, _S, {call, _, start, [_]}) ->
     true;
 precondition(_From, _To, _S, {call, _, stop, []}) ->
     true.
 
-initial_state_data() -> [].
+%% ===================================================================
+%% MODEL
+%% ===================================================================
 
-next_state_data(_From, _To, S, _V,
-		{call, _, allocate, []}) ->
-    S;
-next_state_data(_From, _To, S, _V,
-		{call, _, deallocate, [_]}) ->
-    S;
-next_state_data(_From, _To, S, _V,
-		{call, _, start, [_]}) ->
-    S;
+initial_state_data() -> #freq{}.
+
+next_state_data(_From, _To, S, _V, {call, _, start, [Max]}) ->
+    S#freq{used=[],
+	   free=lists:seq(1, Max)};
+next_state_data(_From, _To, S, V, {call, _, allocate, []}) ->
+    case S#freq.free == [] of
+	true -> S;
+	false ->
+	    S#freq{used=S#freq.used++[V],
+		   free=S#freq.free--[V]}
+    end;
+next_state_data(_From, _To, S, _V, {call, _, deallocate, [Freq]}) ->
+    S#freq{used=S#freq.used--[Freq],
+	   free=S#freq.free++[Freq]};
 next_state_data(_From, _To, S, _V,
 		{call, _, stop, []}) ->
-    S.
+    S#freq{used=[], free=[]}.
 
+%% ===================================================================
+%% POSTCONDITION
+%% ===================================================================
+
+postcondition(state_init, allocated, _S, {call, _, start, []}, R) ->
+    is_pid(R);
+postcondition(allocated, state_init, _S, {call, _, stop, []}, R) ->
+    R = ok;
+postcondition(_From, _To, S, {call, _, allocate, []}, R) ->
+    case R of
+	{error, no_frequency} -> S#freq.free == [];
+	F when is_integer(F) ->
+	    lists:member(F, S#freq.free)
+    end;
+postcondition(_From, To, _S, {call, _, deallocate, [_Freq]}, R)
+  when To /= state_error->
+    R = ok;
 postcondition(_From, state_error, _S, _Call, R) ->
     case R of
 	{'EXIT', _} -> true;
 	_ -> false
     end;
-postcondition(_From, _To, _S, {call, _, allocate, []},
-	      R) ->
-    case R of
-	{'EXIT', _} -> false;
-	_ -> true
-    end;
-postcondition(_From, _To, _S,
-	      {call, _, deallocate, [_]}, R) ->
-    case R of
-	{'EXIT', _} -> false;
-	_ -> true
-    end;
-postcondition(_From, _To, _S, {call, _, start, [_]},
-	      R) ->
+postcondition(_From, _To, _S, {call, _, start, [_]}, R) ->
     case R of
 	{'EXIT', _} -> false;
 	_ -> true
@@ -123,11 +137,21 @@ prop_frequency() ->
 			  (Res == ok))
 	    end).
 
-allocate() -> catch frequency:allocate().
+%%====================================================================
+%% FSM API
+%%====================================================================
 
-deallocate(X1) -> catch frequency:deallocate(X1).
+allocate() ->
+    case frequency:allocate() of
+    	{ok, Freq} -> Freq;
+    	Error -> Error
+    end.
 
-start(X1) -> catch frequency:start(X1).
+deallocate(X1) ->
+    frequency:deallocate(X1).
+
+start(Freqs) ->
+    catch frequency:start(lists:range(1, Freqs)).
 
 stop() -> catch frequency:stop().
 
