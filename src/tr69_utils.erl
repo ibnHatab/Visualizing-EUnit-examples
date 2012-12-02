@@ -32,12 +32,10 @@ sleep(T) ->
 %% ===================================================================
 %% EUnit tests
 %% ===================================================================
--ifdef(TEST).
--include_lib("eunit/include/eunit.hrl").
+%% -ifdef(TEST).
+%% -include_lib("eunit/include/eunit.hrl").
 
--include_lib("eunit/include/eunit.hrl").
+%% is_arch_test_() ->
+%%     ?assert(is_arch (linux)).
 
-is_arch_test_() ->
-    ?assert(is_arch (linux)).
-
--endif.
+%% -endif.

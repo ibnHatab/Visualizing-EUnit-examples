@@ -46,20 +46,30 @@ allocate_test_() ->
      fun(_) -> stop() end,
      fun () ->
 	     ?assertMatch({ok,1},allocate()),
-	     ?assertMatch(ok,deallocate(1)),
-	     ?assertMatch({ok,1},allocate())
+	     ?assertMatch(ok,deallocate(1))
+     end}.
+
+allocate_twice_test_() ->
+    {setup,
+     fun () -> start(?FQ_POOL) end,
+     fun(_) -> stop() end,
+     fun () ->
+	     ?assertMatch({ok,1},allocate()),
+	     ?assertMatch({ok,2},allocate()),
+	     ?assertMatch(ok,deallocate(2)),
+	     ?assertMatch(ok,deallocate(1))
      end}.
 
 %% No more resources
 %% - start allocate allocate
-out_of_frequency_test_one_fq() ->
-    {setup,
-     fun () -> ok end,
-     fun(_) -> stop() end,
-     fun () ->  ?assertMatch(true,start(?FQ_POOL)),
-		?assertMatch({ok,1},allocate()),
-		?assertError({badmatch,{error,no_frequency}},allocate())
-     end}.
+%% out_of_frequency_test_one_fq() ->
+%%     {setup,
+%%      fun () -> ok end,
+%%      fun(_) -> stop() end,
+%%      fun () ->  ?assertMatch(true,start(?FQ_POOL)),
+%% 		?assertMatch({ok,1},allocate()),
+%% 		?assertError({badmatch,{error,no_frequency}},allocate())
+%%      end}.
 
 %% - deallocate
 deallocate_without_start_test() ->
@@ -161,22 +171,22 @@ start_after_allocate_twice_test_() ->
 %%      fun(_) -> stop() end,
 %%      [
 %%       fun() ->
-%% 	      ?assertMatch({ok,1},allocate()),
-%% 	      ?assertMatch(ok,deallocate(1)),
-%% 	      ?assertMatch({ok,1},allocate())
+%% 	      {ok,F1} = allocate(),
+%% 	      ?assertMatch(ok,deallocate(F1)),
+%% 	      {ok,F2} = allocate()
 %%       end,
-%%       fun() ->
-%% 	      ?assertMatch({ok,1},allocate()),
-%% 	      ?assertError({badmatch,{error,no_frequency}},allocate())
-%%       end,
+%%       %% fun() ->
+%%       %% 	      ?assertMatch({ok,1},allocate()),
+%%       %% 	      ?assertError({badmatch,{error,no_frequency}},allocate())
+%%       %% end,
 %%       fun() ->
 %% 	      ?assertMatch({ok,1},allocate()),
 %% 	      ?assertMatch(ok,stop()),
 %% 	      ?assertMatch(true,start(?FQ_POOL))
 %%       end  
 
-%%      ]
-%%      }.
+    %%  ]
+    %% }.
 
    % allocate3_test_() ->
    %      {setup,

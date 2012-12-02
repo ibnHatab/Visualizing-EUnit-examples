@@ -31,10 +31,13 @@ SUITE=frequency_tests
 utest:
 	$(REBAR) -v eunit skip_deps=true suite=$(SUITE)
 
-VISUAL=test/frequency.erl
+SUT=test/frequency.erl
 vztest: utest
-	VIEWER=firefox fsm_dynamic $(VISUAL) $(PWD)/ebin
+	VIEWER=firefox fsm_dynamic $(SUT) $(PWD)/ebin
 
+eqctest: utest
+	fsm_eqc $(SUT) $(PWD)/ebin
+	firefox frequency_eqc.jpg
 
 ctest: 
 	$(REBAR) -v compile ct skip_deps=true suites=tr69_trace case=app_loging_tc
