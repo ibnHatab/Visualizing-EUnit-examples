@@ -91,6 +91,7 @@ next_state_data(_From, _To, S, _V,
 		{call, _, stop, []}) ->
     S#freq{used=[], free=[]}.
 
+
 %% ===================================================================
 %% POSTCONDITION
 %% ===================================================================
@@ -132,8 +133,8 @@ prop_frequency() ->
 		?WHENFAIL((bluefringe_fsm:pp_eunit(frequency,
 						   eqc_statem:zip(Cmds,
 								  [R
-								   || {_, R}
-									  <- History]))),
+	 							   || {_, R}
+		 							  <- History]))),
 			  (Res == ok))
 	    end).
 
