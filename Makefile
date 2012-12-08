@@ -30,7 +30,7 @@ distclean:
 docs:
 	@erl -noshell -run edoc_run application '$(APP)' '"."' '[]'
 
-SUT=locker
+SUT=creature
 SUITE=$(SUT)_tests
 utest: app
 	$(REBAR) -v eunit skip_deps=true suite=$(SUITE)

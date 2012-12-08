@@ -11,19 +11,39 @@
 -behaviour(gen_fsm).
 
 %% API
--export([start_link/0]).
+-export([start_link/1, stop/0,
+	hungry/0, buy/2, new_day/1]).
 
 %% gen_fsm callbacks
--export([init/1, state_name/2, state_name/3, handle_event/3,
+-export([init/1,
+	 cheese_day/2, cheese_day/3,
+	 lettuce_day/2, lettuce_day/3,
+	 grapes_day/2, grapes_day/3,
+	 handle_event/3,
 	 handle_sync_event/4, handle_info/3, terminate/3, code_change/4]).
 
 -define(SERVER, ?MODULE).
 
--record(state, {}).
+
+-type quantity() :: non_neg_integer().
+
+-record(storage, { cheese  = 5 :: quantity(),
+		   lettuce = 5 :: quantity(),
+		   grapes  = 5 :: quantity()
+		 }).
 
 %%%===================================================================
 %%% API
 %%%===================================================================
+
+hungry() ->
+    gen_fsm:sync_send_event(?MODULE, eat).
+
+buy(Food, Quantity) ->
+    gen_fsm:send_event(?MODULE, {store, Food, Quantity}).
+
+new_day(Food) ->
+    gen_fsm:sync_send_event(?MODULE, {new_day, Food}).
 
 %%--------------------------------------------------------------------
 %% @doc
@@ -34,8 +54,13 @@
 %% @spec start_link() -> {ok, Pid} | ignore | {error, Error}
 %% @end
 %%--------------------------------------------------------------------
-start_link() ->
-    gen_fsm:start_link({local, ?SERVER}, ?MODULE, [], []).
+start_link(Day) ->
+    io:format(user, "~n---------------------------~n", []),
+    gen_fsm:start_link({local, ?SERVER}, ?MODULE, [Day], []).
+
+stop() ->
+    io:format(user, "~n============================~n", []),
+    gen_fsm:sync_send_all_state_event(?SERVER, stop).
 
 %%%===================================================================
 %%% gen_fsm callbacks
@@ -54,8 +79,8 @@ start_link() ->
 %%                     {stop, StopReason}
 %% @end
 %%--------------------------------------------------------------------
-init([]) ->
-    {ok, state_name, #state{}}.
+init([Day]) ->
+    {ok, Day, #storage{}}.
 
 %%--------------------------------------------------------------------
 %% @private
@@ -66,14 +91,29 @@ init([]) ->
 %% name as the current state name StateName is called to handle
 %% the event. It is also called if a timeout occurs.
 %%
-%% @spec state_name(Event, State) ->
+%% @spec cheese_day(Event, State) ->
 %%                   {next_state, NextStateName, NextState} |
 %%                   {next_state, NextStateName, NextState, Timeout} |
 %%                   {stop, Reason, NewState}
 %% @end
 %%--------------------------------------------------------------------
-state_name(_Event, State) ->
-    {next_state, state_name, State}.
+cheese_day({store, Food, Quantity}, State) ->
+    NewState = handle_store(Food, Quantity, State),    
+    {next_state, cheese_day, NewState};
+cheese_day(_Event, State) ->
+    {next_state, cheese_day, State}.
+
+lettuce_day({store, Food, Quantity}, State) ->
+    NewState = handle_store(Food, Quantity, State),    
+    {next_state, lettuce_day, NewState};
+lettuce_day(_Event, State) ->
+    {next_state, cheese_day, State}.
+
+grapes_day({store, Food, Quantity}, State) ->
+    NewState = handle_store(Food, Quantity, State),    
+    {next_state, grapes_day, NewState};
+grapes_day(_Event, State) ->
+    {next_state, cheese_day, State}.
 
 %%--------------------------------------------------------------------
 %% @private
@@ -84,7 +124,7 @@ state_name(_Event, State) ->
 %% the same name as the current state name StateName is called to
 %% handle the event.
 %%
-%% @spec state_name(Event, From, State) ->
+%% @spec cheese_day(Event, From, State) ->
 %%                   {next_state, NextStateName, NextState} |
 %%                   {next_state, NextStateName, NextState, Timeout} |
 %%                   {reply, Reply, NextStateName, NextState} |
@@ -93,9 +133,50 @@ state_name(_Event, State) ->
 %%                   {stop, Reason, Reply, NewState}
 %% @end
 %%--------------------------------------------------------------------
-state_name(_Event, _From, State) ->
+cheese_day(eat, From, #storage{cheese = Cheese} = State) ->
+    gen_fsm:reply(From, {cheese_left, Cheese}),
+    {next_state, cheese_day, State#storage{cheese = Cheese - 1}};
+
+cheese_day({new_day, cheese}, _From, State) ->
+    {reply, {error, indigent_food}, cheese_day, State};
+cheese_day({new_day, lettuce}, _From, State) ->
+    {reply, ok, lettuce_day, State};
+cheese_day({new_day, grapes}, _From, State) ->
+    {reply, ok, grapes_day, State};
+
+cheese_day(_Event, _From, State) ->
     Reply = ok,
-    {reply, Reply, state_name, State}.
+    {reply, Reply, cheese_day, State}.
+
+lettuce_day(eat, From, #storage{lettuce = Lettuce} = State) ->
+    gen_fsm:reply(From, {lettuce_left, Lettuce}),
+    {next_state, lettuce_day, State#storage{lettuce = Lettuce - 1}};
+
+lettuce_day({new_day, cheese}, _From, State) ->
+    {reply, ok, cheese_day, State};
+lettuce_day({new_day, lettuce}, _From, State) ->
+    {reply, {error, indigent_food}, lettuce_day, State};
+lettuce_day({new_day, grapes}, _From, State) ->
+    {reply, ok, grapes_day, State};
+
+lettuce_day(_Event, _From, State) ->
+    Reply = ok,
+    {reply, Reply, lettuce_day, State}.
+
+grapes_day(eat, From, #storage{grapes = Grapes} = State) ->
+    gen_fsm:reply(From, {grapes_left, Grapes}),
+    {next_state, grapes_day, State#storage{grapes = Grapes - 1}};
+
+grapes_day({new_day, cheese}, _From, State) ->
+    {reply, ok, cheese_day, State};
+grapes_day({new_day, lettuce}, _From, State) ->
+    {reply, ok, lettuce_day, State};
+grapes_day({new_day, grapes}, _From, State) ->
+    {reply, {error, indigent_food}, grapes_day, State};
+
+grapes_day(_Event, _From, State) ->
+    Reply = ok,
+    {reply, Reply, grapes_day, State}.
 
 %%--------------------------------------------------------------------
 %% @private
@@ -129,6 +210,8 @@ handle_event(_Event, StateName, State) ->
 %%                   {stop, Reason, Reply, NewState}
 %% @end
 %%--------------------------------------------------------------------
+handle_sync_event(stop, _From, _StateName, State) ->
+    {stop, normal, ok, State};
 handle_sync_event(_Event, _From, StateName, State) ->
     Reply = ok,
     {reply, Reply, StateName, State}.
@@ -178,3 +261,19 @@ code_change(_OldVsn, StateName, State, _Extra) ->
 %%%===================================================================
 %%% Internal functions
 %%%===================================================================
+%%--------------------------------------------------------------------
+%% @doc By some `Quantity of `Food from store
+%% @end
+%%--------------------------------------------------------------------
+handle_store(Food, Quantity, S) ->
+    case Food of
+	cheese ->
+	    S#storage{cheese = S#storage.cheese + Quantity};
+	lettuce ->
+	    S#storage{lettuce = S#storage.lettuce + Quantity};
+	grapes ->
+	    S#storage{grapes = S#storage.grapes + Quantity};
+	_ ->
+	    S
+    end.
+    

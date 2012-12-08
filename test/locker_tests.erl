@@ -17,8 +17,8 @@
 
 -define(SECRET, 42).
 
-%% %% Four positive tests.
-%% %% + start stop start stop
+%% Four positive tests.
+%% + start stop start stop
 start_stop_test_() ->
     {inorder,
      [ ?_assertMatch({ok, _},start(?SECRET)),
