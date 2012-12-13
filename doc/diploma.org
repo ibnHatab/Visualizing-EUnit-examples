@@ -1,0 +1,30 @@
+#+STARTUP: showall hidestars
+#+TAGS: DOCS(d) CODING(c) TESTING(t) PLANING(p)
+#+LINK_UP: sitemap.html
+#+LINK_HOME: main.html
+#+COMMENT: toc:nil
+#+OPTIONS: ^:nil
+#+STYLE: <link rel="stylesheet" type="text/css" href="doc-style.css" />
+#+STYLE: <link rel="stylesheet" type="text/css" href="stylesheet.css" />
+#+SETUPFILE: "doc-style.iorg"
+
+#+TITLE: CPE WAN Management Protocol: Augmented Test-driven Development.
+
+
+
+
+* Abstract
+
+This development uses xUnit and Property-based testing to make two
+contributions.  
+
+First we augment design process with system property discovering aid,
+that provides feedback and guide developer from formal specification
+to the exact component design.
+
+Secondly, we re-factor Test Suite used during development phase into
+Acceptance Test for the very same component. This has the effect of
+transforming short living unitary tests into permanent regression test
+framework with tight link to original specification.
+
+

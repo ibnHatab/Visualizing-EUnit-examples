@@ -35,7 +35,9 @@
 %%%===================================================================
 %%% API
 %%%===================================================================
+-type food_left() :: 'cheese_left' | 'lettece_left' | 'grapes_left'.
 
+%% -spec hungry() :: 
 hungry() ->
     gen_fsm:sync_send_event(?MODULE, eat).
 

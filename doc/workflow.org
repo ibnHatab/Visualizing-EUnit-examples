@@ -1,0 +1,60 @@
+#+STARTUP: showall hidestars
+#+TAGS: DOCS(d) CODING(c) TESTING(t) PLANING(p)
+#+LINK_UP: sitemap.html
+#+LINK_HOME: main.html
+#+COMMENT: toc:nil
+#+OPTIONS: ^:nil
+#+STYLE: <link rel="stylesheet" type="text/css" href="doc-style.css" />
+#+STYLE: <link rel="stylesheet" type="text/css" href="stylesheet.css" />
+#+SETUPFILE: "doc-style.iorg"
+
+#+TITLE: FSM developing workflow
+
+
+
+* Workflow
+
+** Augment design process with system property discovering aid.
+
+   This provides feedback and guide developer from formal specification
+   to the exact component design.
+
+   Usage of examples
+   make
+   utest  (ut-shell)
+   vztest
+   eqctest
+   eqcunit
+
+*** Example: locker
+**** Desc:  [[http://pdincau.wordpress.com/2010/09/07/an-introduction-to-gen_fsm-behaviour/][An introduction to gen_fsm behaviour]]
+     The code is as always a simple example, it just identifies to
+     machine states: ”unlocked” and ”locked”. Since we students can’t
+     decide our own code, I will put in the internal state the pin
+     code of the locker.
+
+**** EUnit test (make utest)
+     All 19 tests passed.
+
+**** Grammar and state machine inference (make vztest)
+     Trace:
+     %% + start stop start stop
+     %% - stop
+     %% - start start
+     %% + start lock unlock lock stop
+     %% + start lock stop
+     %% - start unlock
+     %% - start lock start
+
+     [[file:locker_fsm.jpeg]]
+
+**** QuickCheck FSM generator (make eqctest eqcunit)
+     
+     [[file:locker_eqc.jpg]]
+     
+*** Example: frequency
+    
+
+*** Example: creature
+
+*** Example: tradepost
