@@ -48,6 +48,11 @@ eqctest: utest
 eqcunit:
 	EQC_VIEWER=firefox $(REBAR) -v eunit skip_deps=true suite=$(SUT)_eqc
 
+prop: utest
+	erl -pa .eunit/ -pa test/ -noshell -noinput -eval "proper:module(${SUITE})." -s erlang halt
+
+
+
 ctest: 
 	$(REBAR) -v compile ct skip_deps=true suites=tr69_trace case=app_loging_tc
 
@@ -59,3 +64,24 @@ webstart: app
 
 
 
+dialyzer-build:
+	dialyzer --build_plt --verbose			\
+	  --output_plt ~/.dialyzer-R15B.plt 		\
+	  --apps kernel stdlib sasl erts ssl 	 	\
+	    tools os_mon runtime_tools crypto 		\
+	    inets xmerl public_key syntax_tools 	\
+	    mnesia eunit et compiler			\
+	    ./deps/*/ebin
+
+dialyzer: compile
+	dialyzer --plt ~/.dialyzer-R15B.plt \
+	  -Wunmatched_returns 	\
+	  -Werror_handling 	\
+	  -Wrace_conditions 	\
+	  -Wunderspecs		\
+	  ./ebin
+
+#	  -Wunderspecs		\
+# hardcheck
+#	  -Wspecdiffs		\
+#	  -Woverspecs 		\
