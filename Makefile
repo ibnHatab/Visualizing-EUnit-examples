@@ -43,14 +43,17 @@ vztest: utest
 
 eqctest: utest
 	fsm_eqc test/$(SUT) $(PWD)/ebin
+
 	firefox $(SUT)_eqc.jpg
 
 eqcunit:
 	EQC_VIEWER=firefox $(REBAR) -v eunit skip_deps=true suite=$(SUT)_eqc
 
 prop: utest
-	erl -pa .eunit/ -pa test/ -noshell -noinput -eval "proper:module(${SUITE})." -s erlang halt
+	erl -pa .eunit/ -pa test/ -pa deps/*/ebin -noshell -noinput -eval "proper:module(${SUITE})." -s erlang halt
 
+spec: utest
+	erl -pa .eunit/ -pa test/ -noshell -noinput -eval "proper:check_specs(${SUITE}, [verbose, long_result])." -s erlang halt
 
 
 ctest: 
