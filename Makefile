@@ -34,12 +34,12 @@ SUT ?= creature
 SUITE=$(SUT)_tests
 utest: app
 	$(REBAR) -v eunit skip_deps=true suite=$(SUITE)
-
 ut-shell:
 	exec erl -pa $(PWD)/apps/*/ebin -pa $(PWD)/deps/*/ebin -pa $(PWD)/.eunit -boot start_sasl
 
 vztest: utest
-	VIEWER=firefox fsm_dynamic test/$(SUT).erl $(PWD)/ebin
+	VIEWER=firefox fsm_dynamic test/$(SUT).erl 
+#$(PWD)/ebin
 
 eqctest: utest
 	fsm_eqc test/$(SUT) $(PWD)/ebin

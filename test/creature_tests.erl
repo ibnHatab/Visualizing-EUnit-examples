@@ -25,7 +25,6 @@ start_stop_test_() ->
 stop_first_test() ->
     ?assertExit({noproc, _}, creature:stop()).
 
-
 %% + start new_day stop
 new_day_CW_test_() ->
     {setup,
@@ -149,27 +148,27 @@ grapes_day1_test_() ->
      ]}.
 
 %% Locker running, this doesn't impact BlueFringe tests
-fsm_state_test_() ->
-    {foreach,
-     fun ()  -> {ok, P} = creature:start_link(?SECRET), P end,
-     fun (_) -> creature:stop() end,
-     [
-      ?_fsm_test(whereis(creature),"Lettice Day Test",
-      		 [
-      		  {call,creature,new_day,[lettuce],ok},
-      		  {state,is,lettuce_day},
-      		  {call,creature,new_day,[lettuce],{error,indigent_food}},
-      		  {state,is,lettuce_day}, 	%check Frame
-      		  {loopdata,is,[5,5,5]},
-		  {call,creature,hungry,[],{lettuce_left,5}},
-		  {loopdata,is,[5,4,5]}
-      		 ]),
-      ?_fsm_test(whereis(creature),"Provisioning Day Test",
-      		 [
-      		  {state,is,cheese_day},
-      		  {loopdata,is,[5,5,5]},
-		  {call,creature,buy,[lettuce, 2], ok},
-      		  {loopdata,is,[5,7,5]}
-		 ])
-     ]
-    }.
+%% fsm_state_test_() ->
+%%     {foreach,
+%%      fun ()  -> {ok, P} = creature:start_link(?SECRET), P end,
+%%      fun (_) -> creature:stop() end,
+%%      [
+%%       ?_fsm_test(whereis(creature),"Lettice Day Test",
+%%       		 [
+%%       		  {call,creature,new_day,[lettuce],ok},
+%%       		  {state,is,lettuce_day},
+%%       		  {call,creature,new_day,[lettuce],{error,indigent_food}},
+%%       		  {state,is,lettuce_day}, 	%check Frame
+%%       		  {loopdata,is,[5,5,5]},
+%% 		  {call,creature,hungry,[],{lettuce_left,5}},
+%% 		  {loopdata,is,[5,4,5]}
+%%       		 ]),
+%%       ?_fsm_test(whereis(creature),"Provisioning Day Test",
+%%       		 [
+%%       		  {state,is,cheese_day},
+%%       		  {loopdata,is,[5,5,5]},
+%% 		  {call,creature,buy,[lettuce, 2], ok},
+%%       		  {loopdata,is,[5,7,5]}
+%% 		 ])
+%%      ]
+%%     }.
