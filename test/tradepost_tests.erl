@@ -16,18 +16,18 @@ stop_tp() ->
 
 
 %% + start stop
-%% start_stop_test() ->
-%%     ?assertMatch(true, start_tp()),
-%%     ?assertMatch(ok, stop_tp()).
+start_stop_test() ->
+    ?assertMatch(true, start_tp()),
+    ?assertMatch(ok, stop_tp()).
 
 %% - stop
-%% stop_test() ->
-%%     ?assertExit({noproc,{gen_fsm,sync_send_all_state_event,[_,stop]}},stop_tp()).
+stop_test() ->
+    ?assertExit({noproc,{gen_fsm,sync_send_all_state_event,[_,stop]}},stop_tp()).
 
 %% - identify
-%% identify_test() ->
-%%     ?assertExit({noproc,{gen_fsm,sync_send_event,_}},
-%% 		tradepost:seller_identify(which_tp(),seller_password)).
+identify_test() ->
+    ?assertExit({noproc,{gen_fsm,sync_send_event,_}},
+		tradepost:seller_identify(which_tp(),seller_password)).
 
 
 %% From Pending, identify seller, then state should be pending
@@ -95,7 +95,7 @@ ident_identify_test_() ->
  
 
 %% - start stop stop
-%% start_start_test() ->
+%% start_start_test_() ->
 %%     {ok, Pid} = start_link(),
 %%     ?assertMatch(ok, stop(Pid)),
 %%     ?assertExit({noproc,{gen_fsm,sync_send_all_state_event,[Pid,stop]}}, stop(Pid)).

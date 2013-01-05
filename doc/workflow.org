@@ -45,16 +45,66 @@
      %% + start lock stop
      %% - start unlock
      %% - start lock start
-
+     
      [[file:locker_fsm.jpeg]]
 
 **** QuickCheck FSM generator (make eqctest eqcunit)
      
      [[file:locker_eqc.jpg]]
      
+
 *** Example: frequency
-    
+**** Desc: [[http://www.cs.kent.ac.uk/pubs/2010/3041/content.pdf][From Test Cases to FSMs]]
+     In this example it identifies to machine states: "allocate" and
+     "deallocate".
+
+**** EUnit test (make utest)
+     All 17 tests passed.
+
+**** Grammar and state machine inference (make vztest)    
+     Trace:
+     %% + start stop start stop
+     %% - stop
+     %% - start start
+     %% + start allocate deallocate allocate stop
+     %% - start allocate allocate
+     %% - deallocate
+     %% - allocate
+     %% + start allocate stop start
+     
+     [[file:/udir/andreeni/repos/Visualizing-EUnit-examples/test/single_frequency_fsm.jpeg][file:single_frequency_fsm.jpeg]] 
+     
+**** QuickCheck FSM generator (make eqctest eqcunit)
+   
 
 *** Example: creature
+**** Desc: [[http://proper.softlab.ntua.gr/Tutorials/PropEr_testing_of_finite_state_machines.html][PropEr testing of finite state machines]]
+     Consider the following state diagram that describes the life of a
+     strange creature that feeds on cheese, grapes and lettuce but
+     never eats the same kind of food on two consecutive days.
+
+**** EUnit test (make utest)
+     All 34 tests passed.
+
+**** Grammar and state machine inference (make vztest)    
+     Trace:
+     %% + start stop start stop
+     %% - stop
+     %% + start new_day stop
+     %% + start new_day stop
+     %% + start lettuce stop
+     %% + start grapes stop
+     %% - start(cheese) new_day(cheese)
+     %% - start(lettuce) new_day(lettuce) 
+     %% - start(grapes) new_day(grapes)    
+
+     [[file:creature_fsm.jpeg]]
+
+**** QuickCheck FSM generator (make eqctest eqcunit)
+
 
 *** Example: tradepost
+**** Desc:
+**** EUnit test (make utest)
+**** Grammar and state machine inference (make vztest)    
+     
