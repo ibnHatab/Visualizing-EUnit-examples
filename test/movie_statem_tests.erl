@@ -112,7 +112,7 @@ prop_server_works_fine() ->
                                begin
                                    io:format("Comands:\n"),
                                    lists:foreach(fun (C) -> io:format("    ~p~n", [C]) end, Cmds),
-                                   io:format("History: ~p\nState: ~p\nRes: ~p\n",[H,S,Res])
+                                    io:format("History: ~p\nState: ~p\nRes: ~p\n",[H,S,Res])
                                end,
                                Res == ok)
                         end))

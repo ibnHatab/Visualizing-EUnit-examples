@@ -98,6 +98,13 @@ insert_test_() ->
                                                      listq_ins({1,11},
                                                                listq_ins({0,1},[])))).
 
+tolist_test_() ->
+    ?_test(
+       begin
+           L = listq_to_list(listq_rem(listq_ins({0, 5},[]), 17)),
+           ?_assertEqual([5], L)
+       end
+      ).
 
 %% eqc_test_no() ->
 %%     {timeout, 30,
@@ -117,7 +124,7 @@ insert_test_() ->
 
 %% Generators
 priority() -> integer(-20,20).
-value() -> pos_integer().
+value() -> integer(400,500).
     
 
 priority_in(InQ) ->
@@ -138,10 +145,7 @@ command(#state{in_queue = InQ}) ->
            , {call, ?SERVER, pout, []}
            , {call, ?SERVER, to_list, []}]
           ++[{call, ?SERVER, out, [priority_in(InQ)]} || InQ =/= []]
-           %% , {call, ?SERVER, , []}
-           %% , {call, ?SERVER, , []}
-           %% , {call, ?SERVER, , []}
-         ).
+         ). 
 
 %% Next state transformation, S is the current state
 next_state(#state{in_queue = InQ} = S,_V,{call,_,in,[V,P]}) ->
@@ -149,7 +153,7 @@ next_state(#state{in_queue = InQ} = S,_V,{call,_,in,[V,P]}) ->
 next_state(#state{in_queue = InQ} = S,_V,{call,_,in,[V]}) ->
     S#state{in_queue=listq_ins({0, V}, InQ)};
 
-next_state(#state{in_queue = InQ} = S,_V,{call,_,out,_}) ->
+next_state(#state{in_queue = InQ} = S,_V,{call,_,out,[]}) ->
     S#state{in_queue=listq_rem(InQ)};
 next_state(#state{in_queue = InQ} = S,_V,{call,_,pout,_}) ->
     S#state{in_queue=listq_rem(InQ)};
@@ -163,29 +167,49 @@ next_state(#state{in_queue = InQ} = S,_V,{call,_,_,_}) ->
 precondition(_S,{call,_,_,_}) ->
     true.
 
-%% Postcondition, checked after command has been evaluated
+%% Postcondition, checked after command has been evaluated 
 %% OBS: S is the state before next_state(S,_,<command>)
 
-%% Model head should match removed element
-postcondition(#state{in_queue = InQ} = S,{call,_,out,[P]},Res) ->
+%% For Prio and the SUT returned the value R. Then peeking in InQ for the
+%% first element at that given priority should be the same element.
+postcondition(#state{in_queue = InQ}, {call,_,out,[P]},Res) ->
     Res == listq_prio_peek(InQ,P);
-postcondition(_S,{call,_,_,_},_Res) ->
-    true.
+postcondition(#state{in_queue = InQ}, {call,_,pout,_},Res) ->
+    Res == listq_ppeek(InQ);
+postcondition(#state{in_queue = InQ}, {call,_,out,[]},Res) ->
+    Res == listq_peek(InQ);
 
+postcondition(#state{in_queue = InQ}, {call,_,to_list,_},Res) ->
+    Res =:= listq_to_list(InQ);
+
+postcondition(#state{in_queue = InQ}, {call,_,len,_},Res) ->
+    Res =:= listq_len(InQ);
+
+postcondition(_S,{call,_,is_queue,_},_Res) -> true;
+
+postcondition(#state{in_queue = InQ}, {call,_,is_empty,_},Res) ->
+    Res == (InQ == []);
+
+postcondition(_S,{call,_,in,_},_Res) -> true;
+
+postcondition(_S,{call,_,_,_},_Res) -> false.
+
+   
 prop_listq_correct() ->
     numtests(300,
              ?FORALL(Cmds,commands(?MODULE),
                      ?TRAPEXIT(
                         begin
-                            %% io:format(">> ~p~n", [Cmds]),
                             ?SERVER:start_link(pqueue),
                             {H,S,Res} = run_commands(?MODULE,Cmds),
                             ?SERVER:stop(),
                             ?WHENFAIL(
                                begin
+                                   io:format("History:\n"),
+                                   lists:foreach(fun (C) -> io:format(" ~p~n", [C]) end, H),
                                    io:format("Comands:\n"),
-                                   lists:foreach(fun (C) -> io:format("    ~p~n", [C]) end, Cmds),
-                                   io:format("History: ~p\nState: ~p\nRes: ~p\n",[H,S,Res])
+                                   lists:foreach(fun (C) -> io:format(" ~p~n", [C]) end, Cmds),
+                                   io:format("State: ~p\nRes: ~p\n",[S,Res])
                                end,
                                Res == ok)
                         end)
