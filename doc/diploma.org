@@ -28,3 +28,27 @@ transforming short living unitary tests into permanent regression test
 framework with tight link to original specification.
 
 
+* Introduction
+  1 + 2 Background
+
+* Workflow
+
+** BlueFringe (+/- tests)
+
+** Examples discovery and feedback
+
+** Example guided development (tradepost)
+
+* Practical application (CWMP)
+** UTest for CWMP decoder
+   
+** CT and regression testing
+
+** CI travis
+
+** Session and RPC design
+   (modulu nostru)
+
+*** Protocol desing (pictures)
+
+* Acceptance Test

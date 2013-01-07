@@ -16,6 +16,18 @@
 
 ** Augment design process with system property discovering aid.
 
+   
+#+begin_src ditaa :file images/round_corners.png :cmdline  -s 1.8
+design 
+/--+
+| Test Suite +-->  property discovering  -> QuickCheck
++--/                         V
+  guide developer     <-   feedback
+
+
+#+end_src
+
+
    This provides feedback and guide developer from formal specification
    to the exact component design.
 
@@ -55,24 +67,48 @@
 
 *** Example: frequency
 **** Desc: [[http://www.cs.kent.ac.uk/pubs/2010/3041/content.pdf][From Test Cases to FSMs]]
-     In this example it identifies to machine states: "allocate" and
-     "deallocate".
+     As a running example we write tests for a simple server that 
+     manages a number of resources – frequencies for example –
+     which can each be allocated and deallocated.
 
 **** EUnit test (make utest)
-     All 17 tests passed.
-
-**** Grammar and state machine inference (make vztest)    
-     Trace:
-     %% + start stop start stop
-     %% - stop
-     %% - start start
-     %% + start allocate deallocate allocate stop
-     %% - start allocate allocate
-     %% - deallocate
-     %% - allocate
-     %% + start allocate stop start
+     One frequency: All 17 tests passed.
+     Two frequencies: All 15 tests passed.
      
-     [[file:/udir/andreeni/repos/Visualizing-EUnit-examples/test/single_frequency_fsm.jpeg][file:single_frequency_fsm.jpeg]] 
+
+**** Grammar and state machine inference (make vztest)   
+***** One frequency
+
+      Trace:
+      %% + start stop start stop
+      %% - stop
+      %% - start start
+      %% + start allocate deallocate allocate stop
+      %% - start allocate allocate
+      %% - deallocate
+      %% - allocate
+      %% + start allocate stop start
+      
+      [[file:single_frequency_fsm.jpeg][file:one_frequency_fsm.jpeg]] 
+
+***** Two frequencies
+
+      Trace:
+      %% + start stop start stop
+      %% - stop
+      %% - start start
+      %% + start allocate allocate deallocate allocate
+           deallocate deallocate stop
+      %% - start allocate allocate allocate
+      %% - allocate
+      %% - deallocate
+      %% + start allocate stop start
+      %% + start allocate allocate stop start
+      %% - start allocate deallocate deallocate
+      %% - start allocate start
+      %% - start allocate allocate start
+
+      [[file:two_frequency_fsm.jpeg]]
      
 **** QuickCheck FSM generator (make eqctest eqcunit)
    
