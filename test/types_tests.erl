@@ -12,6 +12,8 @@
 -include_lib("proper/include/proper.hrl").
 -include_lib("eunit/include/eunit.hrl").
 
+-compile(export_all).
+
 -export([leazy_dict/0, model/1]).
 
 ok_prop_comute() ->
@@ -124,27 +126,39 @@ model_store(K,V,PL) ->
 
 
 
+%% Generating unuque values
 
+display_test() ->
+    io:format(user, ">> unique ~n~p~n", 
+              [proper_gen:pick(unique())]),
+    io:format(user, ">> unique gen ~n~p~n", 
+              [proper_gen:pick(unique(integer()), 20)]),
+    io:format(user, ">> unique shuffle ~n~p~n", 
+              [proper_gen:pick(shuffle(unique()))]),
+    {Ms, Res} = timer:tc(proper_gen, pick, [uvector(14, integer())]),            
+    io:format(user, ">> unique shuffle: ~p us ~n~p~n", [Ms, Res]),
+    
+    ok.
+
+unique() ->
+    lists:seq(1, 20).
+
+unique(Generator) ->
+    ?LET(Values, list(Generator),
+        lists:usort(Values)).
+
+shuffle([]) ->
+    [];
+shuffle(L) ->
+    ?LET(X, elements(L), [X | shuffle(lists:delete(X, L))]).
+
+
+uvector(0, _G) ->
+    [];
+uvector(N, G) ->
+    ?LET(Values, uvector(N-1, G),
+        ?LET(Value, ?SUCHTHAT(V, G, not lists:member(V, Values)),
+             [Value | Values])).
 
 -endif. % (TEST).
 
-
-%% prop_new_array_opts() ->
-%%     ?FORALL(Opts, array:array_opts(),
-%% 	    array:is_array(array:new(Opts))).
-
-
-%% -spec divide(integer(), integer()) -> integer().
-%% divide(A, B) ->
-%%   A div B.
-
-%% devide_test_() ->
-%%     ?_assert(proper:check_spec([?MODULE, devide, []])).
-
-%% -spec filter(fun((T) -> term()), [T]) -> [T].
-%% filter(Fun, List) ->
-%%     lists:filter(Fun, List).
-
-%% -spec max([T]) -> T.
-%% max(List) ->
-%%     lists:max(List).
