@@ -1,0 +1,10 @@
+{application,eunit_viz_examples,
+             [{description,[]},
+              {vsn,"1"},
+              {registered,[]},
+              {applications,[kernel,stdlib]},
+              {mod,{eunit_viz_examples_app,[]}},
+              {env,[]},
+              {modules,[creature,delete,eunit_viz_examples_app,
+                        eunit_viz_examples_sup,frequency,locker,movie_server,
+                        tradepost]}]}.

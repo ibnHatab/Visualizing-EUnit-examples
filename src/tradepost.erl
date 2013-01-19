@@ -16,7 +16,12 @@
 %% gen_fsm callbacks
 -export([init/1, handle_event/3, handle_sync_event/4, handle_info/3,
          terminate/3, code_change/4]).
--record(state, {object,cash,seller,buyer,time}).
+
+-record(state, {object :: atom(),
+		cash,
+		seller,
+		buyer,
+		time}).
 
 %%% API
 start_link() -> gen_fsm:start_link(?MODULE, [], []).
