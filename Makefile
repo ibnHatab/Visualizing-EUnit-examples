@@ -1,5 +1,5 @@
 
-APP := tr69
+APP := eunit_viz
 VSN = $(shell sed -n 's/.*{vsn,.*"\(.*\)"}.*/\1/p' src/$(APP).app.src)
 
 REBAR='./rebar'
@@ -38,11 +38,10 @@ ut-shell:
 	exec erl -pa $(PWD)/apps/*/ebin -pa $(PWD)/deps/*/ebin -pa $(PWD)/.eunit -boot start_sasl
 
 vztest: utest
-	VIEWER=firefox fsm_dynamic test/$(SUT).erl 
-#$(PWD)/ebin
+	VIEWER=firefox $(PWD)/ebin/fsm_dynamic test/$(SUT).erl 
 
 eqctest: utest
-	fsm_eqc test/$(SUT) $(PWD)/ebin
+	$(PWD)/ebin/fsm_eqc test/$(SUT) $(PWD)/ebin
 
 	firefox $(SUT)_eqc.jpg
 
@@ -54,17 +53,6 @@ prop: utest
 
 spec: utest
 	erl -pa .eunit/ -pa test/ -noshell -noinput -eval "proper:check_specs(${SUITE}, [verbose, long_result])." -s erlang halt
-
-
-ctest: 
-	$(REBAR) -v compile ct skip_deps=true suites=tr69_trace case=app_loging_tc
-
-webstart: app
-	exec erl -pa $(PWD)/ebin -pa $(PWD)/deps/*/ebin 	\
-		-config priv/sys.config				\
-		-boot start_sasl -s lager -s tr69		\
-		|| echo Exit
-
 
 
 dialyzer-build:

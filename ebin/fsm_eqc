@@ -1,0 +1,49 @@
+#!/usr/bin/env escript
+
+-export([main/1]).
+
+main([]) ->    
+    io:format("Usage: \n" ++ 
+		  " fsm_eqc File.erl [PZ] - compiles File_tests.erl into EQC FSM\n");
+main([FileName]) ->
+    compile(FileName, []);
+main([FileName, EUnitDir]) ->
+    code:add_pathz(EUnitDir),
+    compile(FileName, [{i, EUnitDir}]).
+
+compile(FileName, Options) ->
+    {{Pos,Neg},CleanupTree} = eunit_to_fsm:dynamic(FileName,
+						    [
+						     {i, "ebin"},
+						     {i, "../.."},
+						     {i, "deps/*/ebin"},
+						     {i, "../deps"},
+						     {i, "../../../deps"},
+						     {i, "../include"},
+						     {i, "./include"}
+						     | Options
+						    ]
+						  ),
+    %% io:format(user, "Pos: ~p~n", [Pos]),
+    %% io:format(user, "Neg: ~p~n", [Neg]),
+    Automata = bluefringe:qsm({Pos,Neg}),
+
+    BaseName = filename:basename(FileName,".erl"),
+    
+    ModName = list_to_atom(BaseName),    
+    EqcName = list_to_atom(BaseName ++ "_eqc"),
+    EqcFileName = BaseName ++ "_eqc.erl",
+    
+    %% third transform automata into QuickCheck template
+    String = bluefringe_fsm:eqc_fsm(Automata,ModName,CleanupTree),    
+
+    %% io:format(user, ">> EqcFileName: ~p~n", [EqcFileName]),
+ 
+    ok = file:write_file(EqcFileName,String),
+
+    %% Compile the QuickCheck code
+    code:purge(EqcName),
+    compile:file(EqcFileName),
+    code:load_file(EqcName),
+    eqc_fsm:visualize(EqcName),
+    ok.
