@@ -1,3 +1,6 @@
+%%% File    : tradepost_tests.erl
+%%% Description : Tradepost test module
+
 -module(tradepost_tests).
 
 -include_lib("eunit/include/eunit.hrl").
