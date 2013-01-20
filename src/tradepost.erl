@@ -17,20 +17,24 @@
 -export([init/1, handle_event/3, handle_sync_event/4, handle_info/3,
          terminate/3, code_change/4]).
 
+-type password() :: atom().
+-type date_time() :: tuple(Date::calendar:date(),
+			   Time::calendar:time()).
 -record(state, {object :: atom(),
-		cash,
-		seller,
-		buyer,
-		time}).
-
-%%% API
-start_link() -> gen_fsm:start_link(?MODULE, [], []).
-
+		cash   :: pos_integer(),
+		seller :: password(),
+		buyer  :: password(),
+		time   :: date_time()
+	       }).
 
 introspection_statename(TradePost) ->
     gen_fsm:sync_send_all_state_event(TradePost,which_statename).
 introspection_loopdata(TradePost) ->
     gen_fsm:sync_send_all_state_event(TradePost,which_loopdata).
+
+%%% API
+start_link() -> gen_fsm:start_link(?MODULE, [], []).
+
 stop(Pid) -> gen_fsm:sync_send_all_state_event(Pid,stop).
 
 seller_identify(TradePost,Password) ->

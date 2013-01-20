@@ -4,6 +4,7 @@
 -module(tradepost_tests).
 
 -include_lib("eunit/include/eunit.hrl").
+-include_lib("femto_test/include/eunit_fsm.hrl").
 
 which_tp() ->
     whereis(tradepost).
@@ -14,27 +15,38 @@ start_tp() ->
 
 stop_tp() ->
     Pid = which_tp(),
-    %% unregister(tradepost),
+    true = unregister(tradepost),
     tradepost:stop(Pid).
 
 
-%% + start stop
-start_stop_test() ->
-    ?assertMatch(true, start_tp()),
-    ?assertMatch(ok, stop_tp()).
+%%--------------------------------------------------------------------
+%% @doc
+%% Test tradepost API via FSM inspection mechanism
+%%
+%% @end
+%%--------------------------------------------------------------------
+fsm_tradepost_test_() -> 
+    {foreach, 
+     fun ()  -> start_tp()end,
+     fun (_) -> stop_tp() end,
+     [
+      % Initialy in pending state and no loop data
+      ?_fsm_state(which_tp(), pending),
+      ?_fsm_data(which_tp(), [undefined,undefined,undefined,undefined,undefined]),
+      %% From Pending, identify seller, then state should be pending
+      %% loopdata should now contain seller_password
+      ?_fsm_test(which_tp(), "Udentify seler Test",
+		 [
+		  {call, tradepost, seller_identify, [which_tp(), seller_password], ok},
+		  {state, is, pending},
+		  {loopdata, is, [undefined,undefined, seller_password, undefined,undefined]}
+		 ])
 
-%% - stop
-stop_test() ->
-    ?assertExit({noproc,{gen_fsm,sync_send_all_state_event,[_,stop]}},stop_tp()).
-
-%% - identify
-identify_test() ->
-    ?assertExit({noproc,{gen_fsm,sync_send_event,_}},
-		tradepost:seller_identify(which_tp(),seller_password)).
+     ]  
+    }.
 
 
-%% From Pending, identify seller, then state should be pending
-%% loopdata should now contain seller_password
+
 %% + start identify insertitem withdraw_item
 identify_test_() ->
     {setup,
@@ -61,28 +73,48 @@ identify_test_() ->
     }.
 
 
+
+%% + start stop
+start_stop_test() ->
+    ?assertMatch(true, start_tp()),
+    ?assertMatch(ok, stop_tp()),
+    ?assertMatch(true, start_tp()),
+    ?assertMatch(ok, stop_tp()).
+
+%% %% - stop
+%% stop_test() ->
+%%     ?assertExit({noproc,{gen_fsm,sync_send_all_state_event,[_,stop]}},stop_tp()).
+
+%% %% - identify
+%% identify_test() ->
+%%     ?assertExit({noproc,{gen_fsm,sync_send_event,_}},
+%% 		tradepost:seller_identify(which_tp(),seller_password)).
+
+
+
+
 %% - start insertitem
-insertitem_test_() ->
-    {setup,
-     fun() -> start_tp() end,
-     fun(_) -> stop_tp() end,
-      ?_assertExit(error,
-		   case tradepost:seller_insertitem(which_tp(), playstation,seller_password) of
-		       error -> exit(error); Other -> Other end)
-    }.
+%% insertitem_test_() ->
+%%     {setup,
+%%      fun() -> start_tp() end,
+%%      fun(_) -> stop_tp() end,
+%%       ?_assertExit(error,
+%% 		   case tradepost:seller_insertitem(which_tp(), playstation,seller_password) of
+%% 		       error -> exit(error); Other -> Other end)
+%%     }.
 
 %% - start identify withdraw_item
-ident_identify_test_() ->
-    {setup,
-     fun() -> start_tp() end,
-     fun(_) -> stop_tp() end,
-     [
-      ?_assertEqual(ok,tradepost:seller_identify(which_tp(),seller_password)),
-      ?_assertExit(error,
-		   case tradepost:withdraw_item(which_tp(),seller_password) of
-		       error -> exit(error); Other -> Other end)
-     ]
-    }.
+%% ident_identify_test_() ->
+%%     {setup,
+%%      fun() -> start_tp() end,
+%%      fun(_) -> stop_tp() end,
+%%      [
+%%       ?_assertEqual(ok,tradepost:seller_identify(which_tp(),seller_password)),
+%%       ?_assertExit(error,
+%% 		   case tradepost:withdraw_item(which_tp(),seller_password) of
+%% 		       error -> exit(error); Other -> Other end)
+%%      ]
+%%     }.
 
 
 
