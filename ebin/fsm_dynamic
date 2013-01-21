@@ -14,9 +14,11 @@ main([File_Name, EUnit_Dir]) ->
     compile(File_Name, [{i, EUnit_Dir}]).
 
 compile(File_Name, Options) ->
+    io:format(">> ~p~n", [filename:absname("")]),
     {{Pos,Neg},_CleanupTree} = eunit_to_fsm:dynamic(File_Name,
 						    [
 						     {i, "ebin"},
+						     {i, ".eunit"},
 						     {i, "../.."},
 						     {i, "deps/*/ebin"},
 						     {i, "../deps"},

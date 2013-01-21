@@ -27,7 +27,7 @@ eqc_test_() ->
 %% FSM
 %% ===================================================================
 
--define(MAX_FREQ, 3).
+-define(MAX_FREQ, 5).
 
 -record(freq,{used=[], free=[]}).
 

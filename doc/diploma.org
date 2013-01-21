@@ -6,7 +6,6 @@
 #+OPTIONS: ^:nil
 #+STYLE: <link rel="stylesheet" type="text/css" href="doc-style.css" />
 #+STYLE: <link rel="stylesheet" type="text/css" href="stylesheet.css" />
-#+SETUPFILE: "doc-style.iorg"
 
 #+TITLE: CPE WAN Management Protocol: Augmented Test-driven Development.
 

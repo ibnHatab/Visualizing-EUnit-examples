@@ -22,7 +22,7 @@ stop_tp() ->
 %%--------------------------------------------------------------------
 %% @doc
 %% Test tradepost API via FSM inspection mechanism
-%%
+%% V.0 unitary test
 %% @end
 %%--------------------------------------------------------------------
 fsm_tradepost_test_() -> 
@@ -41,7 +41,7 @@ fsm_tradepost_test_() ->
 		  {state, is, pending},
 		  {loopdata, is, [undefined,undefined, seller_password, undefined,undefined]}
 		 ])
-
+      
      ]  
     }.
 
