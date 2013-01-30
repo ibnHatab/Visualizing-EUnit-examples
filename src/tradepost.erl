@@ -10,6 +10,8 @@
 -export([start_link/0,introspection_statename/1,introspection_loopdata/1,
 	 stop/1,seller_identify/2,seller_insertitem/3,withdraw_item/2]).
 
+
+
 %% States
 -export([pending/2,pending/3,item_received/3]).
 
@@ -26,6 +28,23 @@
 		buyer  :: password(),
 		time   :: date_time()
 	       }).
+
+-export([which_tp/0, start_tp/0, stop_tp/0]).
+
+%% Test API
+which_tp() ->
+    whereis(tradepost).
+
+start_tp() ->
+    %%io:format(user, "~n>> Start~n", []),
+    {ok, Pid} = tradepost:start_link(),
+    register(tradepost, Pid).
+
+stop_tp() ->
+    %% io:format(user, "~n>> Stop~n", []),
+    Pid = which_tp(),
+    true = unregister(tradepost),
+    tradepost:stop(Pid).
 
 introspection_statename(TradePost) ->
     gen_fsm:sync_send_all_state_event(TradePost,which_statename).

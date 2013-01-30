@@ -16,17 +16,52 @@
 
 ** Augment design process with system property discovering aid.
 
-   
-#+begin_src ditaa :file images/round_corners.png :cmdline  -s 1.8
-design 
-/--+
-| Test Suite +-->  property discovering  -> QuickCheck
-+--/                         V
-  guide developer     <-   feedback
+#+begin_src ditaa :file design_flow.png :cmdline  -s 1.0
+  
+  
+  +---------+                            +----------------+
+  | FSM V.0 |                            |   eunit_viz    |
+  |{d}cBLU  +--------------------------->+     cGRE       |      +-----------------------+
+  +----+----+                            +--+-------------+      |      bluefringe:      |
+       |                                    ^       |      +---->+       eqc_fsm() cGRE  |
+       |          +--------------+          |       |      |     +-----------+-----------+
+       +--------->+    EUNIT     |          |       |      |                 |
+                  |    c1CB      |     +----+       |      |                 |
+       +--------->+ (Test Suite) |     |            |      |                 |
+       |          +------+-------+     |            |      |                 |
+       |                 |             |            |      |                 v     
+       |            +----+             |            |      |   +-------------+---------------+
+       |            |    |             |            |      |   | +------------------------+  |
+  +----+------+     v    v     +-------+-------+    |      |   | |          << eqc_fsm >> |  |
+  | FSM UT V.0|    NOK   OK    |     FSM_UT    |    |      |   | |                        |  |
+  | {d}cBLU   +--------------->+      V.1      |    |      |   | |     $SUT_eqc.erl       |  |
+  +-----------+                |   (pos,neg)   +----+------+   | |-add pre/post condition |  |
+                               |   {d}cBLU     |    |          | |      cYEL              |  |
+                               +---------------+    |          | +------------------------+  |
+                                                    |          |  -rename state              |                         
+                                       +------------+          |  {d}                        |             
+                                       |            |          +----------------+------------+
+                                       |            v                           | 
+                                       |   +--------+-------+                   |
+                                       |   | eunit_fsm.jpg  |                   v
+                                       |   |     cGRE       |           +-------+------+
+                                       |   +----------------+           |   eqc_fsm()  +----> $SUT_eqc.jpeg
+                                       v                                |      cGRE    |    
+                                      NOK                               +-------+------+
+                                                                                | 
+                                                                                v 
+
+                                                                               NOK
 
 
+       {API testing}             {Design proving}                  {Application testing}
 #+end_src
 
+#+results:
+[[file:design_flow.png]]
+
+ 
+   
 
    This provides feedback and guide developer from formal specification
    to the exact component design.

@@ -6,17 +6,7 @@
 -include_lib("eunit/include/eunit.hrl").
 -include_lib("femto_test/include/eunit_fsm.hrl").
 
-which_tp() ->
-    whereis(tradepost).
-
-start_tp() ->
-    {ok, Pid} = tradepost:start_link(),
-    register(tradepost, Pid).
-
-stop_tp() ->
-    Pid = which_tp(),
-    true = unregister(tradepost),
-    tradepost:stop(Pid).
+-import(tradepost, [which_tp/0, start_tp/0, stop_tp/0]).
 
 
 %%--------------------------------------------------------------------
@@ -25,30 +15,112 @@ stop_tp() ->
 %% V.0 unitary test
 %% @end
 %%--------------------------------------------------------------------
-fsm_tradepost_test_() -> 
-    {foreach, 
-     fun ()  -> start_tp()end,
-     fun (_) -> stop_tp() end,
-     [
-      % Initialy in pending state and no loop data
-      ?_fsm_state(which_tp(), pending),
-      ?_fsm_data(which_tp(), [undefined,undefined,undefined,undefined,undefined]),
-      %% From Pending, identify seller, then state should be pending
-      %% loopdata should now contain seller_password
-      ?_fsm_test(which_tp(), "Udentify seler Test",
-		 [
-		  {call, tradepost, seller_identify, [which_tp(), seller_password], ok},
-		  {state, is, pending},
-		  {loopdata, is, [undefined,undefined, seller_password, undefined,undefined]}
-		 ])
-      
-     ]  
+%% fsm_tradepost_test_no () ->
+%%     {foreach,
+%%      fun ()  -> start_tp()end,
+%%      fun (_) -> stop_tp() end,
+%%      [
+%%       % Initialy in pending state and no loop data
+%%       ?_fsm_state(which_tp(), pending),
+%%       ?_fsm_data(which_tp(), [undefined,undefined,undefined,undefined,undefined]),
+%%       %% From Pending, identify seller, then state should be pending
+%%       %% loopdata should now contain seller_password
+%%       ?_fsm_test(which_tp(), "Identify seler Test",
+%% 		 [
+%% 		  {call, tradepost, seller_identify, [which_tp(), seller_password], ok},
+%% 		  {state, is, pending},
+%% 		  {loopdata, is, [undefined,undefined, seller_password, undefined,undefined]}
+%% 		 ]),
+%%       ?_fsm_test(which_tp(), "Insert/Withdraw Test",
+%% 		 [
+%% 		  {call, tradepost, seller_identify, [which_tp(), seller_password], ok},
+%% 		  {state, is, pending},
+%% 		  {loopdata, is, [undefined,undefined, seller_password, undefined,undefined]},
+
+%% 		  {call, tradepost, seller_insertitem, [which_tp(), playstation, seller_password], ok},
+%% 		  {state, is, item_received},	% mfa
+%% 		  {loopdata, is, [playstation, undefined, seller_password, undefined,undefined]},
+%% 		  {call, tradepost, withdraw_item, [which_tp(), seller_password], ok},
+%% 		  {state, is, pending}
+%% 		 ])
+%%      ]
+%%     }.
+
+
+%%--------------------------------------------------------------------
+%% @doc
+%% Design Proofing with FSM Unitary tests 
+%% V.1 fsm unitary test for Gramma Inference using positive and negative tests
+%% @end
+%%--------------------------------------------------------------------
+
+
+%% + start stop start stop
+start_stop_start_test_() ->
+    {inorder,
+     [ ?_assertMatch(true,start_tp()),
+       ?_assertMatch(ok,stop_tp()),
+       ?_assertMatch(true,start_tp()),
+       ?_assertMatch(ok,stop_tp())
+      ]}.
+
+%% - unregister stop
+stopFirst_test_() ->
+    [
+    ?_assertError(badarg,stop_tp()),
+    ?_assertError(badarg,stop_tp())
+    ].
+
+%% - start start
+startTwice_test_() ->
+      [{setup,
+	fun ()  -> start_tp () end,
+	fun (_) -> stop_tp() end,
+	?_assertError(badarg,start_tp())
+   }].
+
+%% %% - identify
+%% identify_test() ->
+%%     ?assertExit({noproc,{gen_fsm,sync_send_event,_}},
+%% 		tradepost:seller_identify(which_tp(),seller_password)).
+
+%% + start identify stop
+identify_stop_test_()->
+    {setup,
+     fun() -> start_tp() end,
+     fun(_) -> stop_tp() end,
+     fun () ->
+	     Pid = which_tp(),
+	     ?assertMatch(ok,tradepost:seller_identify(Pid,seller_password)),
+	     ?_assertMatch(ok,stop_tp())
+     end
+	}.
+
+%% - start identify
+identify_error_test_()->
+    {setup,
+     fun() -> start_tp() end,
+     fun(_) -> stop_tp() end,
+     fun () ->
+	     Pid = which_tp(),
+	     ?_assertError({noproc,{gen_fsm,sync_send_event,[undefined,{identify_seller,seller_password}]}},
+			 tradepost:seller_identify(Pid,seller_password))
+		 
+	 end
+	}.
+
+%% - start insertitem
+insertitem_test_() ->
+    {setup,
+     fun() -> start_tp() end,
+     fun(_) -> stop_tp() end,
+      ?_assertExit(error,
+		   case tradepost:seller_insertitem(which_tp(), playstation,seller_password) of
+		       error -> exit(error); Other -> Other end)
     }.
 
-
-
-%% + start identify insertitem withdraw_item
-identify_test_() ->
+%% + start identify insertitem
+identify_insertitem_test_()->
     {setup,
      fun() -> start_tp() end,
      fun(_) -> stop_tp() end,
@@ -56,30 +128,56 @@ identify_test_() ->
       ?_test(
 	 begin
 	     Pid = which_tp(),
-	     ?assertEqual(ok,tradepost:seller_identify(Pid,seller_password)),
-	     [_Object,_Cash,Seller,_Buyer,_Time] =
-		 tradepost:introspection_loopdata(Pid),
-	     ?assertEqual(seller_password, Seller),
-	     ?assertEqual(ok, tradepost:seller_insertitem(Pid, playstation,seller_password)),
-	     ?assertEqual(item_received,tradepost:introspection_statename(Pid)),
-             ?assertEqual([playstation,undefined,seller_password,undefined,
-			   undefined],tradepost:introspection_loopdata(Pid)),
-	     ?assertEqual(ok,tradepost:withdraw_item(Pid,seller_password)),
-             ?assertEqual(pending,tradepost:introspection_statename(Pid))
-	 end
-	),
-      ?_assert(true)
-     ]
-    }.
+	     ?assertMatch(ok,tradepost:seller_identify(Pid,seller_password)),
+	      [_Object,_Cash,Seller,_Buyer,_Time] = tradepost:introspection_loopdata(Pid),
+	      ?assertMatch(seller_password, Seller),
+	      ?assertMatch(ok, tradepost:seller_insertitem(Pid, playstation,seller_password)),
+	      ?assertMatch(item_received,tradepost:introspection_statename(Pid)),
+             ?assertMatch([playstation,undefined,seller_password,undefined,
+	     		   undefined],tradepost:introspection_loopdata(Pid))
+	end
+	)]}.    
+      
+
+
+%% + start identify insertitem withdraw_item
+%% start_identify_test_no() ->
+%%     {setup,
+%%      fun() -> start_tp() end,
+%%      fun(_) -> stop_tp() end,
+%%      [
+%%       ?_test(
+%% 	 begin
+%% 	     Pid = which_tp(),
+%% 	     ?assertMatch(ok,tradepost:seller_identify(Pid,seller_password)),
+%% 	     [_Object,_Cash,Seller,_Buyer,_Time] =
+%% 		 tradepost:introspection_loopdata(Pid),
+%% 	     ?assertMatch(seller_password, Seller),
+%% 	     ?assertMatch(ok, tradepost:seller_insertitem(Pid, playstation,seller_password)),
+%% 	     ?assertMatch(item_received,tradepost:introspection_statename(Pid)),
+%%              ?assertMatch([playstation,undefined,seller_password,undefined,
+%% 			   undefined],tradepost:introspection_loopdata(Pid)),
+%% 	     ?assertMatch(ok,tradepost:withdraw_item(Pid,seller_password)),
+%%              ?assertMatch(pending,tradepost:introspection_statename(Pid))
+%% 	 end
+%% 	),
+%%       ?_assert(true)
+%%      ]
+%%     }.
+
+%% - start identify insertitem -> error
+%% - start pending -> error
+
+
 
 
 
 %% + start stop
-start_stop_test() ->
-    ?assertMatch(true, start_tp()),
-    ?assertMatch(ok, stop_tp()),
-    ?assertMatch(true, start_tp()),
-    ?assertMatch(ok, stop_tp()).
+%% start_stop_testno() ->
+%%     ?assertMatch(true, start_tp()),
+%%     ?assertMatch(ok, stop_tp()),
+%%     ?assertMatch(true, start_tp()),
+%%     ?assertMatch(ok, stop_tp()).
 
 %% %% - stop
 %% stop_test() ->
@@ -127,7 +225,7 @@ start_stop_test() ->
 	      %% ?assertMatch(ok, stop(Pid))
       %% 	      ok
       %% end
- 
+
 
 %% - start stop stop
 %% start_start_test_() ->
@@ -184,9 +282,9 @@ start_stop_test() ->
 %% started_properly(Pid) ->
 %%     fun() ->
 %%             ?assertEqual(pending,tradepost:introspection_statename(Pid)),
-%%             ?assertEqual([undefined,undefined,undefined,undefined,undefined],
-%%                          tradepost:introspection_loopdata(Pid))
+%%             ?assertEqual([undefined,undefined,undefined,undefined,undefined], tradepost:introspection_loopdata(Pid))
 %%     end.
+
 
 % Now, we are adding the Seller API tests
 %% identify_seller(Pid) ->
