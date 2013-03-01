@@ -6,5 +6,7 @@
               {mod,{eunit_viz_examples_app,[]}},
               {env,[]},
               {modules,[creature,delete,eunit_viz_examples_app,
-                        eunit_viz_examples_sup,frequency,locker,movie_server,
-                        tradepost]}]}.
+                        eunit_viz_examples_sup,frequency,gen_protocol,
+                        gen_session,locker,movie_server,tr69,tr69_app,
+                        tr69_filter,tr69_server,tr69_sup,tr69_trace,
+                        tr69_utils,tradepost]}]}.
