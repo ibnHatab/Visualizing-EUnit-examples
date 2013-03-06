@@ -11,7 +11,6 @@
 	 stop/1,seller_identify/2,seller_insertitem/3,withdraw_item/2]).
 
 
-
 %% States
 -export([pending/2,pending/3,item_received/3]).
 

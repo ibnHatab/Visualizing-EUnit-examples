@@ -2,8 +2,8 @@
 
 -export([main/1]).
 
-main([]) ->    
-    io:format("Usage: \n" ++ 
+main([]) ->
+    io:format("Usage: \n" ++
 		  " export VIEWER=firefox \n" ++
 		  " fsm_dynamic File.erl [PZ] - compiles File_tests.erl into minimal FSM and" ++
 		  " visualize it in $VIEWER\n" );
@@ -14,20 +14,12 @@ main([File_Name, EUnit_Dir]) ->
     compile(File_Name, [{i, EUnit_Dir}]).
 
 compile(File_Name, Options) ->
-    io:format(">> ~p~n", [filename:absname("")]),
-    {{Pos,Neg},_CleanupTree} = eunit_to_fsm:dynamic(File_Name,
-						    [
-						     {i, "ebin"},
-						     {i, ".eunit"},
-						     {i, "../.."},
-						     {i, "deps/*/ebin"},
-						     {i, "../deps"},
-						     {i, "../../../deps"},
-						     {i, "../include"},
-						     {i, "./include"}
-						     | Options
-						    ]
-						  ),
+    %% io:format(">> ~p~n", [filename:absname("")]),
+    ExtraPath = [ "ebin", ".eunit", "deps/*/ebin", "./include", "./test"],
+    lists:foreach(fun(P) -> code:add_pathz(P) end, ExtraPath), 
+    %% io:format(">> ~p~n", [code:get_path()]),
+    ExtraOptions = [{i, P} || P <- ExtraPath],
+    {{Pos,Neg},_CleanupTree} = eunit_to_fsm:dynamic(File_Name, ExtraOptions ++ Options),
     %% io:format(user, "Pos: ~p~n", [Pos]),
     %% io:format(user, "Neg: ~p~n", [Neg]),
     Automata = bluefringe:qsm({Pos,Neg}),
