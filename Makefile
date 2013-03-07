@@ -38,7 +38,7 @@ ut-shell:
 	exec erl -pa $(PWD)/apps/*/ebin -pa $(PWD)/deps/*/ebin -pa $(PWD)/.eunit -boot start_sasl
 
 vztest: utest
-	VIEWER=firefox $(PWD)/ebin/fsm_dynamic test/$(SUT).erl 
+	VIEWER=firefox $(PWD)/ebin/fsm_dynamic test/$(SUT).erl
 
 eqctest: utest
 	$(PWD)/ebin/fsm_eqc test/$(SUT) $(PWD)/ebin

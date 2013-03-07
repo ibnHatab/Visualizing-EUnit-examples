@@ -4,11 +4,20 @@
 #+LINK_HOME: main.html
 #+COMMENT: toc:nil
 #+OPTIONS: ^:nil
+#+OPTIONS:   H:3 num:t toc:t \n:nil @:t ::t |:t ^:nil -:t f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil tags:not-in-toc
+#+DESCRIPTION: Augment design process with system property discovering aid.
+#+KEYWORDS: TDD, 
+#+LANGUAGE:  en
+
 #+STYLE: <link rel="stylesheet" type="text/css" href="doc-style.css" />
 #+STYLE: <link rel="stylesheet" type="text/css" href="stylesheet.css" />
 
-
 #+TITLE: FSM developing workflow
+
+#+AUTHOR:    Mirela Nicola
+#+EMAIL:     mirela_nikola@yahoo.com
+#+DATE:      2013-03-07 Thu
 
 
 
@@ -189,7 +198,71 @@
      [[file:creature_eqc.jpg]]
 
 *** Example: tradepost
-**** Desc:
-**** EUnit test (make utest)
-**** Grammar and state machine inference (make vztest)    
+    This example demonsteates how gramma inference can be used to
+    navigate toward right design.
+
+**** Desc: 
+     The module implementing the tests of the Tradepost where seller
+     interact with bayer. What the seller needs, is a way to insert an
+     item, and a way to remove an item. Also to identify him/her self with
+     a naive password approach. Once identified, the seller (and only the
+     seller) should be able to add and retract items.
+
      
+
+**** Version Zero
+     
+***** EUnit test (make utest)
+      We use Unitary tests to test module public API.
+#+begin_src erlang
+     [
+      % Initialy in pending state and no loop data
+      ?_fsm_state(which_tp(), pending),
+      ?_fsm_data(which_tp(), [undefined,undefined,undefined,undefined,undefined]),
+      %% From Pending, identify seller, then state should be pending
+      %% loopdata should now contain seller_password
+      ?_fsm_test(which_tp(), "Identify seler Test",
+		 [
+		  {call, tradepost, seller_identify, [which_tp(), seller_password], ok},
+		  {state, is, pending},
+		  {loopdata, is, [undefined,undefined, seller_password, undefined,undefined]}
+		 ]),
+      ?_fsm_test(which_tp(), "Insert/Withdraw Test",
+		 [
+		  {call, tradepost, seller_identify, [which_tp(), seller_password], ok},
+		  {state, is, pending},
+		  {loopdata, is, [undefined,undefined, seller_password, undefined,undefined]},
+
+		  {call, tradepost, seller_insertitem, [which_tp(), playstation, seller_password], ok},
+		  {state, is, item_received},	% mfa
+		  {loopdata, is, [playstation, undefined, seller_password, undefined,undefined]},
+		  {call, tradepost, withdraw_item, [which_tp(), seller_password], ok},
+		  {state, is, pending}
+		 ])
+     ]
+#+end_src
+      
+
+***** Grammar and state machine inference (make vztest)    
+      We can do 100% coverage of initial version using nine tests.
+      Trace:
+#+begin_src shell
+ + start stop start stop
+ - unregister stop
+ - start start
+ - identify
+ + start identify stop
+ - start insertitem
+ + start identify insertitem withdraw insertitem
+ - start identify insertitem withdraw withdraw 
+#+end_src
+      
+      [[file:tracepost-v.0_fsm.jpeg]]
+
+
+
+      This view is quite different from inplementation code which have
+      only 3 states: start, pending, item_received. This is because
+      state where saler identifies self if lurking in FSM context.
+      
+      Our next task is to make it explicit in Version 1.0

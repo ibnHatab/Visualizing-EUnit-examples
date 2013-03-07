@@ -18,7 +18,7 @@ compile(File_Name, Options) ->
     ExtraPath = [ "ebin", ".eunit", "deps/*/ebin", "./include", "./test"],
     lists:foreach(fun(P) -> code:add_pathz(P) end, ExtraPath), 
     %% io:format(">> ~p~n", [code:get_path()]),
-    ExtraOptions = [{i, P} || P <- ExtraPath],
+    ExtraOptions = [{i, P} || P <- ExtraPath] ++ [{d, 'VZTEST', true}],
     {{Pos,Neg},_CleanupTree} = eunit_to_fsm:dynamic(File_Name, ExtraOptions ++ Options),
     %% io:format(user, "Pos: ~p~n", [Pos]),
     %% io:format(user, "Neg: ~p~n", [Neg]),

@@ -3,7 +3,7 @@
 %%% @copyright (C) 2010, Gianfranco
 %%% Created :  2 Sep 2010 by Gianfranco <zenon@zen.home>
 %%%-------------------------------------------------------------------
--module(tradepost).
+-module(tradepost_v0).
 -behaviour(gen_fsm).
 
 %% API
