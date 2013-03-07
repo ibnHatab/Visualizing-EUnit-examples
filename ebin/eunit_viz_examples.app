@@ -7,4 +7,4 @@
               {env,[]},
               {modules,[creature,delete,eunit_viz_examples_app,
                         eunit_viz_examples_sup,frequency,locker,movie_server,
-                        tradepost]}]}.
+                        tradepost,tradepost_v0]}]}.
