@@ -12,7 +12,7 @@
 
 
 %% States
--export([pending/2,pending/3,item_received/3]).
+-export([pending/2, pending/3, ready/3, item_received/3]).
 
 %% gen_fsm callbacks
 -export([init/1, handle_event/3, handle_sync_event/4, handle_info/3,
@@ -31,18 +31,16 @@
 
 %% Test API
 -define(VZTEST, true).
-
-
 -ifdef(VZTEST).
+
 -export([which_tp/0, start_tp/0, stop_tp/0,
-	 seller_identify_tp/1, seller_insertitem_tp/2, withdraw_item_tp/1,
-	 introspection_statename/1,introspection_loopdata/1]).
+	 seller_identify_tp/1, seller_insertitem_tp/2, withdraw_item_tp/1]).
 
 which_tp() ->
     whereis(tradepost).
 
 start_tp() ->
-    %%io:format(user, "~n>> Start~n", []),
+    %% io:format(user, "~n>> Start~n", []),
     {ok, Pid} = tradepost:start_link(),
     register(tradepost, Pid).
 
@@ -60,11 +58,6 @@ seller_insertitem_tp(Item,Password) ->
 	
 withdraw_item_tp(Password) ->
     withdraw_item(which_tp(), Password).
-
-introspection_statename(TradePost) ->
-    gen_fsm:sync_send_all_state_event(TradePost,which_statename).
-introspection_loopdata(TradePost) ->
-    gen_fsm:sync_send_all_state_event(TradePost,which_loopdata).
 
 -endif.
 
@@ -85,30 +78,31 @@ withdraw_item(TradePost,Password) ->
 %%--------------------------------------------------------------------
 pending(_Event,LoopData) -> {next_state,pending,LoopData}.
 
-pending({identify_seller,Password},_Frm,LoopD = #state{seller=Password}) ->
-    {reply,ok,pending,LoopD};
 pending({identify_seller,Password},_Frm,LoopD = #state{seller=undefined}) ->
-    {reply,ok,pending,LoopD#state{seller=Password}};
-pending({identify_seller,_},_,LoopD) ->
-    {reply,error,pending,LoopD};
-
-pending({insert,Item,Password},_Frm,LoopD = #state{seller=Password}) ->
-    {reply,ok,item_received,LoopD#state{object=Item}};
+    {reply,ok,ready,LoopD#state{seller=Password}};
 pending({insert,_,_},_Frm,LoopD) ->
-    {reply,error,pending,LoopD};
+    {reply,error,ready,LoopD};
 pending({withdraw,_},_Frm,LoopD) ->
-    {reply,error,pending,LoopD}.
+    {reply,error,ready,LoopD}.
+
+ready({identify_seller,Password},_Frm,LoopD = #state{seller=Password}) ->
+    {reply,ok,ready,LoopD};
+ready({identify_seller,_},_,LoopD) ->
+    {reply,error,ready,LoopD};
+
+ready({insert,Item,Password},_Frm,LoopD = #state{seller=Password}) ->
+    {reply,ok,item_received,LoopD#state{object=Item}};
+ready({insert,_,_},_Frm,LoopD) ->
+    {reply,error,ready,LoopD};
+ready({withdraw,_},_Frm,LoopD) ->
+    {reply,error,ready,LoopD}.
 
 item_received({withdraw,Password},_Frm,LoopD = #state{seller=Password}) ->
-    {reply,ok,pending,LoopD#state{object=undefined}};
+    {reply,ok,ready,LoopD#state{object=undefined}};
 item_received({withdraw,_},_Frm,LoopD) ->
     {reply,error,item_received,LoopD}.
 
 %%--------------------------------------------------------------------
-handle_sync_event(which_statename, _From, StateName, LoopData) ->
-    {reply, StateName, StateName, LoopData};
-handle_sync_event(which_loopdata, _From, StateName, LoopData) ->
-    {reply,tl(tuple_to_list(LoopData)),StateName,LoopData};
 handle_sync_event(stop,_From,_StateName,LoopData) ->
     {stop,normal,ok,LoopData};
 handle_sync_event(_E,_From,StateName,LoopData) ->

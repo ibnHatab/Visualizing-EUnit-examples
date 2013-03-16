@@ -14,25 +14,176 @@
 
 * Abstract
 
-This development uses xUnit and Property-based testing to make two
-contributions.  
+     This development uses xUnit and Property-based testing to make two
+     contributions.  
 
-First we augment design process with system property discovering aid,
-that provides feedback and guide developer from formal specification
-to the exact component design.
+     First we augment design process with system property discovering aid,
+     that provides feedback and guide developer from formal specification
+     to the exact component design.
 
-Secondly, we re-factor Test Suite used during development phase into
-Acceptance Test for the very same component. This has the effect of
-transforming short living unitary tests into permanent regression test
-framework with tight link to original specification.
+     Secondly, we re-factor Test Suite used during development phase into
+     Acceptance Test for the very same component. This has the effect of
+     transforming short living unitary tests into permanent regression test
+     framework with tight link to original specification.
 
 
 * Introduction
-  1 + 2 Background
 
-* Workflow
+    In this paper we show how finite state machines can be
+    automatically extracted from sets of unit tests - here Eunit tests
+    for Erlang programs. We use these FSMs in two ways. 
+
+    First, they can in themselves provide feedback on the adequacy of
+    a set of tests, independently of any implementation.
+      
+
+    Secondly, they can be transformed and used within PropErl to guide
+    the random generation of test sequences for state-based systems.
+
+  
+** Test-driven Development
+
+   Test-Driven Development (TDD), a practice suggesting that tests
+   should be the driving force in software creation, is very popular
+   within the Erlang community. Testing is used in all phases of
+   software development to reveal software discrepancies, or increase
+   confidence about their absence. TDD calls for automating the test
+   process as much as possible, in an attempt to produce concise and
+   reusable test suites that can accomplish a thorough testing of the
+   system under test. Unit testing frameworks (e.g. EUnit for Erlang)
+   are commonly used towards this direction, since they can
+   automatically execute large test suites and capture related
+   output. Nevertheless, it is the user’s manual task to provide valid
+   test input and decide on the correctness of the output.
+
+   The process of testing a single function can be conceptually
+   divided into three steps:
+
+   1. Acquire a valid input for the function.
+   2. Run the function for that input and capture its output.
+   3. Decide if the input-output pair conforms to the function’s
+      intended behaviour (also known as the “oracle problem").
+
+** Implementing Actor model with Erlang
+   
+*** Actor model
+    Actor are part of multi-agent system is a computerized system
+    composed of multiple interacting intelligent agents within an
+    environment. Multi-agent systems can be used to solve problems
+    that are difficult or impossible for an individual agent or a
+    monolithic system to solve. Intelligence may include some
+    methodic, functional, procedural or algorithmic search, find and
+    processing approach.
+
+   - The Actor model is about the semantics of message passing.
+   - Direct communication and asynchrony.
+   - Composing Actor Systems is easy.
+
+*** A Short Introduction to Erlang and OTP
+
+   Erlang is a high-level, general-purpose programming language and
+   runtime system with built-in support for concurrency, distribution
+   and fault-tolerance. Its sequential subset is a strict,
+   dynamically-typed functional programming language. Originally
+   developed in the mid-1980s in Ericsson’s research laboratories,
+   Erlang was designed with a clear goal in mind: to support and
+   facilitate the development of scalable, robust, massively
+   concurrent, soft real-time, non-stop applications, such as
+   telecommunication systems.
+
+   The Open Telecom Platform (OTP) provides a framework to structure
+   Erlang systems offering robustness and fault-tolerance together
+   with a set of tools and libraries. In the next sections, we present
+   in more detail the design patterns that can be followed when
+   building software with Erlang/OTP.
+
+**** OTP Design Principles
+     The OTP Design Principles is a set of principles for how to
+     structure Erlang code in terms of processes, modules and
+     directories. In OTP systems are built in the following
+     hierarchical manner:
+
+     1. Releases
+        Releases are at the top of the hierarchy. A release contains all
+        the information necessary to build and run a system. Internally a
+        release consists of zero or more applications.
+
+     2. Applications 
+
+        Applications are simpler than releases, they contain all the
+        code and operating procedures necessary to implement some
+        speciﬁc functionality. The simplest kind of application does
+        not have any processes, but consists of a collection of
+        functional modules. Such an application is called a library
+        application. An application with processes is usually
+        implemented as a supervision tree, that is a process
+        structuring model based on the idea of workers and
+        supervisors.
+
+     3. Supervisors
+
+        OTP applications are commonly built from a number of instances
+        of supervisors. Supervisors are processes which monitor the
+        behaviour of workers. A supervisor can restart a worker if
+        something goes wrong.
+
+     4. Workers
+
+        OTP supervisors supervise worker nodes. Workers are processes
+        which perform computations, that is, they do the actual work.
+
+** Testing state-based systems
+
+    In particular we seek to develop PropErl properties from sets of
+    unit tests, thus providing a migration path from traditional unit
+    testing to property-based testing. To test state-based systems in
+    PropErl it is usual to develop a state machine model (using proper_fsm
+    or proper_statem) which encapsulates the permissible sequences of API
+    calls.
+
+    We show how the FSM extracted from a set of unit tests can be
+    transformed into a PropErl FSM, and thus how a set of unit tests
+    can be combined into a property. This has the benefit of allowing
+    the system to be tested on many more inputs, namely all those
+    permissible in the FSM, and a selection of these can be generated
+    randomly using PropErl generators.
+
+
+** Roadmap
+   
+   We begin by discussing the background to this work.
+   We first introduce test-driven development, and then discuss
+   EUnit and PropErl for testing Erlang systems. We also look
+   at grammar inference as a mechanism for inferring finite-state
+   machines from sets of words in the language and its complement.
+   
+   We use visualization and test adjustment to do FSM inference in our
+   case study.
+
+   In Workflow we discusses a systematic approach to developing and
+   assessing tests during test-driven development through the case
+   study of a ‘frequency server’. We use Eunit to express the tests and
+   Dot to display finite state machines from test sets in a fully
+   automated way. While doing this we discuss the question of how
+   to abstract away from particular aspects of the system in forming a
+   model of the system under test.
+
+   In last Section builds on this by developing a PropErl state
+   machine for the CWMP protocol. This machine is based on the FSM
+   inferred in the previous section, and we discuss the process of
+   building the Protocol machine from this FSM with a view to automating
+   the process as much as possible in the future.
+   
+* Software Testing Background
+
+
+* Augmented Test-driven Development and Property Inference 
+
+ 
+* Design Workflow
 
 ** BlueFringe (+/- tests)
+   
 
 ** Examples discovery and feedback
 
