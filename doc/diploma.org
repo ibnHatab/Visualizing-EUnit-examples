@@ -18,7 +18,6 @@
 
 #+TITLE: CPE WAN Management Protocol: Augmented Test-driven Development.
 
-
 * Abstract
 
      This development uses xUnit and Property-based testing to make two
@@ -218,11 +217,11 @@
 
    Application overview
 
-   | Module    | URI                                                              | Description |
-   |-----------+------------------------------------------------------------------+-------------|
-   | cpe_cwmpc | url = https://github.com/ibnHatab/cpe_cwmpc.git                  | Protocol    |
-   | cpe_host  | url = https://ibnHatab:jasha123@github.com/ibnHatab/cpe_host.git | Host utils  |
-   | cwmp      | url = https://ibnHatab:jasha123@github.com/ibnHatab/cwmp.git     | Encoder     |
+   | Module    | URI                                       | Description |
+   |-----------+-------------------------------------------+-------------|
+   | cpe_cwmpc | https://github.com/ibnHatab/cpe_cwmpc.git | Protocol    |
+   | cpe_host  | https://github.com/ibnHatab/cpe_host.git  | Host utils  |
+   | cwmp      | https://github.com/ibnHatab/cwmp.git      | Encoder     |
    
 
 ** [[file:cwmp_testing.org][CWMP Client Application Testing]]
@@ -235,3 +234,11 @@
    
 * Conclusion and future work 
   
+
+* Bibliography
+
+   | Module                     | URI                                                        |
+   |----------------------------+------------------------------------------------------------|
+   | Visualizing-EUnit-examples | https://github.com/ibnHatab/Visualizing-EUnit-examples.git |
+   |                            |                                                            |
+
