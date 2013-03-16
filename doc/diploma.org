@@ -2,14 +2,21 @@
 #+TAGS: DOCS(d) CODING(c) TESTING(t) PLANING(p)
 #+LINK_UP: sitemap.html
 #+LINK_HOME: main.html
-#+COMMENT: toc:nil
-#+OPTIONS: ^:nil
-#+STYLE: <link rel="stylesheet" type="text/css" href="doc-style.css" />
-#+STYLE: <link rel="stylesheet" type="text/css" href="stylesheet.css" />
+#+OPTIONS:   H:3 num:t toc:t \n:nil @:t ::t |:t ^:nil -:t f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil tags:not-in-toc
+#+DESCRIPTION: Augment design process with system property discovering aid.
+#+KEYWORDS: SmallCell, 
+#+LANGUAGE: en
+
+#+STYLE: <link rel="stylesheet" type="text/css" href="org-manual.css" />
+
+
+#+AUTHOR:    Mirela Nicola
+#+EMAIL:     mirela_nikola@yahoo.com
+#+DATE:      2013-03-07 Thu
+
 
 #+TITLE: CPE WAN Management Protocol: Augmented Test-driven Development.
-
-
 
 
 * Abstract
@@ -174,31 +181,57 @@
    building the Protocol machine from this FSM with a view to automating
    the process as much as possible in the future.
    
-* Software Testing Background
+
+* [[file:background.org][Software Testing Background]]
+
+  In this section we give a brief overview of the main topics which
+  form the background to the work reported this paper, as well as
+  providing references where more information can be found.
 
 
-* Augmented Test-driven Development and Property Inference 
+* [[file:blue_fringe.org][Augmented Test-driven Development and Property Inference]]
 
- 
-* Design Workflow
+  In this section we introduce a procedure for systematically
+  developing the unit tests that are used in the test-driven development
+  process of systems. This is illustrated through the running example of
+  a simple server.
 
-** BlueFringe (+/- tests)
+* [[file:workflow.org][Design Workflow]] (Examples)
+  
+  In this section we present bunch of examples of out method in
+  action. Last example (tradepost) illustrate augment design process
+  with system property discovering aid.
+
+
+* Practical application
+
+** CPE WAN Management Protocol
+   
+   CWMP is a text based protocol. Orders sent between the device (CPE)
+   and auto configuration server (ACS) are transported over HTTP (or
+   more frequently HTTPS). At this level (HTTP) CPE is behaving in the
+   role of client and ACS in the role of HTTP server. This essentially
+   means that control over the flow of the provisioning session is the
+   sole responsibility of the device.
+
+** [[file:/local/vlad/repos/femto/cpe_cwmpc/doc/application.org][CWMP Client Application]]
+
+   Application overview
+
+   | Module    | URI                                                              | Description |
+   |-----------+------------------------------------------------------------------+-------------|
+   | cpe_cwmpc | url = https://github.com/ibnHatab/cpe_cwmpc.git                  | Protocol    |
+   | cpe_host  | url = https://ibnHatab:jasha123@github.com/ibnHatab/cpe_host.git | Host utils  |
+   | cwmp      | url = https://ibnHatab:jasha123@github.com/ibnHatab/cwmp.git     | Encoder     |
    
 
-** Examples discovery and feedback
+** [[file:cwmp_testing.org][CWMP Client Application Testing]]
 
-** Example guided development (tradepost)
 
-* Practical application (CWMP)
-** UTest for CWMP decoder
+
+* Acceptance Test  
+** Fitness
+   TODO or not TODO ???
    
-** CT and regression testing
-
-** CI travis
-
-** Session and RPC design
-   (modulu nostru)
-
-*** Protocol desing (pictures)
-
-* Acceptance Test
+* Conclusion and future work 
+  

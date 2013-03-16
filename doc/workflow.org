@@ -2,30 +2,26 @@
 #+TAGS: DOCS(d) CODING(c) TESTING(t) PLANING(p)
 #+LINK_UP: sitemap.html
 #+LINK_HOME: main.html
-#+COMMENT: toc:nil
-#+OPTIONS: ^:nil
 #+OPTIONS:   H:3 num:t toc:t \n:nil @:t ::t |:t ^:nil -:t f:t *:t <:t
 #+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil tags:not-in-toc
 #+DESCRIPTION: Augment design process with system property discovering aid.
-#+KEYWORDS: TDD, 
-#+LANGUAGE:  en
+#+KEYWORDS: SmallCell, 
+#+LANGUAGE: en
 
-#+STYLE: <link rel="stylesheet" type="text/css" href="doc-style.css" />
-#+STYLE: <link rel="stylesheet" type="text/css" href="stylesheet.css" />
+#+STYLE: <link rel="stylesheet" type="text/css" href="org-manual.css" />
 
-#+TITLE: FSM developing workflow
 
 #+AUTHOR:    Mirela Nicola
 #+EMAIL:     mirela_nikola@yahoo.com
 #+DATE:      2013-03-07 Thu
 
-
+#+TITLE: FSM developing workflow
 
 * Workflow
 
 ** Augment design process with system property discovering aid.
 
-#+begin_src ditaa :file design_flow.png :cmdline  -s 1.0
+#+begin_src ditaa :file design_flow.png :cmdline  -s 0.8
   
   
   +---------+                            +----------------+
@@ -70,8 +66,6 @@
 [[file:design_flow.png]]
 
  
-   
-
    This provides feedback and guide developer from formal specification
    to the exact component design.
 
@@ -258,7 +252,6 @@
 #+end_src
       
       [[file:tracepost-v.0_fsm.jpeg]]
-
 
 
       This view is quite different from inplementation code which have
