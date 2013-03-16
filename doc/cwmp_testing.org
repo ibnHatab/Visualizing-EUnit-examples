@@ -18,15 +18,165 @@
 #+TITLE: [[file:/local/vlad/repos/femto/cpe_cwmpc/doc/application.org][CWMP Client Application]] Testing
 
 ** UTest for CWMP decoder
-
-   [[file:/local/vlad/repos/femto/cwmp/doc/testlist.org][Test List]] for RPC protocol Unitary tests.
-
+   
+   Those tast was primaty drive during developmen and remains only in
+   form of minimal test preserved within particular module for
+   purporse of mainenance.
+      
 
 ** CT and Regression Testing
 
-** CI Travis
+   The Common Test framework (CT) is a tool which supports
+   implementation and automated execution of test cases towards
+   arbitrary types of target systems. The CT framework is based on the
+   OTP Test Server and it's the main tool being used in all testing-
+   and verification activities that are part of Erlang/OTP system
+   development- and maintenance.
 
-** Session and RPC design
-   (modulu nostru)
+*** [[file:/local/vlad/repos/femto/cwmp/doc/testlist.org][Test List]] for RPC protocol Unitary tests.
+
+*** Test Suites
+
+#+begin_src erlang
+%%-*- mode: erlang -*-
+
+{logdir, "@PATH@/logs"}.
+%%{trace_dir, "@PATH@/test/data"}.
+{alias, tr_app, "@PATH@/."}.		      
+{include, "@PATH@/include"}.
+{include, "@PATH@/deps"}.
+{suites, tr_app, [cwmp_builder_SUITE
+		  , soap_parser_SUITE
+		  , hdm_trace_SUITE
+		 ]}.
+#+end_src    
+
+    [[file:TestResult.png]]
+
+**** Builder Suite
+     
+     This suites contain regression tests for CWMP primitives encoding procedures.
+
+     | Test Name                                        | Description |
+     |--------------------------------------------------+-------------|
+     | build_AddObject_tc                               |             |
+     | build_AddObjectResponse_tc                       |             |
+     | build_AutonomousDUStateChangeComplete_tc         |             |
+     | build_AutonomousDUStateChangeCompleteResponse_tc |             |
+     | build_AutonomousTransferComplete_tc              |             |
+     | build_AutonomousTransferCompleteResponse_tc      |             |
+     | build_CancelTransfer_tc                          |             |
+     | build_CancelTransferResponse_tc                  |             |
+     | build_ChangeDUState_tc                           |             |
+     | build_ChangeDUStateResponse_tc                   |             |
+     | build_DeleteObject_tc                            |             |
+     | build_DeleteObjectResponse_tc                    |             |
+     | build_Download_tc                                |             |
+     | build_DownloadResponse_tc                        |             |
+     | build_DUStateChangeComplete_tc                   |             |
+     | build_DUStateChangeCompleteResponse_tc           |             |
+     | build_FactoryReset_tc                            |             |
+     | build_FactoryResetResponse_tc                    |             |
+     | build_Fault_tc                                   |             |
+     | build_GetAllQueuedTransfers_tc                   |             |
+     | build_GetAllQueuedTransfersResponse_tc           |             |
+     | build_GetOptions_tc                              |             |
+     | build_GetOptionsResponse_tc                      |             |
+     | build_GetParameterAttributes_tc                  |             |
+     | build_GetParameterAttributesResponse_tc          |             |
+     | build_GetParameterNames_tc                       |             |
+     | build_GetParameterNamesResponse_tc               |             |
+     | build_GetParameterValues_tc                      |             |
+     | build_GetParameterValuesResponse_tc              |             |
+     | build_GetQueuedTransfers_tc                      |             |
+     | build_GetQueuedTransfersResponse_tc              |             |
+     | build_GetRPCMethods_tc                           |             |
+     | build_GetRPCMethodsResponse_tc                   |             |
+     | build_Inform_tc                                  |             |
+     | build_InformResponse_tc                          |             |
+     | build_Kicked_tc                                  |             |
+     | build_KickedResponse_tc                          |             |
+     | build_Reboot_tc                                  |             |
+     | build_RebootResponse_tc                          |             |
+     | build_RequestDownload_tc                         |             |
+     | build_RequestDownloadResponse_tc                 |             |
+     | build_ScheduleDownload_tc                        |             |
+     | build_ScheduleDownloadResponse_tc                |             |
+     | build_ScheduleInform_tc                          |             |
+     | build_ScheduleInformResponse_tc                  |             |
+     | build_SetParameterAttributes_tc                  |             |
+     | build_SetParameterAttributesResponse_tc          |             |
+     | build_SetParameterValues_tc                      |             |
+     | build_SetParameterValuesResponse_tc              |             |
+     | build_SetVouchers_tc                             |             |
+     | build_SetVouchersResponse_tc                     |             |
+     | build_TransferComplete_tc                        |             |
+     | build_TransferCompleteResponse_tc                |             |
+     | build_Upload_tc                                  |             |
+     | build_UploadResponse_tc                          |             |
 
 
+***** Test results
+      [[file:BuilderTestResult.png]]
+  
+**** Parser Suite
+     
+     This suite verifies CWMP protocol data types parsig and generation.
+
+     | Test Name              | Description |
+     |------------------------+-------------|
+     | parse_boolean_tc       |             |
+     | parse_iso8601_tc       |             |
+     | parse_string_tc        |             |
+     | parse_int_tc           |             |
+     | parse_unsignedInt_tc   |             |
+     | parse_anyURI_tc        |             |
+     | name_namespace_tc      |             |
+     | check_namespace_tc     |             |
+     | parse_EventCodeType_tc |             |
+     | parse_ArraySize_tc     |             |
+     | parse_FileType_tc      |             |
+     | parse_FaultCode_tc     |             |
+     | parse_Notification_tc  |             |
+     | parse_WindowMode_tc    |             |
+     | build_anyURI_tc        |             |
+     | base64_loop_tc         |             |
+     |                        |             |
+
+**** HDM Trace Suite
+
+     Is a minimal interworking test with Alcatel Home Device Manager (Motive) server.
+
+     | Test Name                           | Description |
+     |-------------------------------------+-------------|
+     | cwmp_AutonomousTransferComplete.xml |             |
+     | cwmp_AutonomousTransferComplete.xql |             |
+     | cwmp_GetRPCMethodsRespons.xml       |             |
+     | cwmp_GetRPCMethodsRespons.xql       |             |
+     | cwmp_GetRPCMethods.xml              |             |
+     | cwmp_GetRPCMethods.xql              |             |
+     | cwmp_InformResponse.xml             |             |
+     | cwmp_InformResponse.xql             |             |
+     | cwmp_Inform.xml                     |             |
+     | cwmp_Inform.xql                     |             |
+     | cwmp_SetVouchers.xml                |             |
+
+
+** Continuos Integration
+
+   Continuous integration (CI) is the practice, in software
+   engineering, of merging all developer workspaces with a shared
+   mainline several times a day. It was first named and proposed as
+   part of extreme programming (XP).
+
+   Travis CI: A hosted continuous integration service for the open
+   source community.  Travis VMs provide 32-bit Erlang OTP releases
+   R14B04, R14B03 and R14B02 built using kerl.  
+
+   [[https://travis-ci.org/andreeni/cpe_host][Continuos integration status: andreeni/cpe_host]] for Generic Debug,
+   Trace, Logging, ProcRegistry for small equipment.
+   
+   Once the code is built, all tests should run to confirm that it
+   behaves as the developers expect it to behave.
+
+   [[file:Travis.png]]

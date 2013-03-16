@@ -20,11 +20,79 @@
 
 * Test-driven development
 
+  A manifesto for test-driven development (TDD) is given in Beck’s
+  monograph. This gives advice on adopting TDD in practice, as well as
+  answering frequently-asked questions. The thesis of testdriven
+  development is that it is the formulation of tests which should be
+  used to drive the development process.  Speciﬁcally, the requirements
+  for the system are given by a series of tests developed
+  incrementally. At each stage the implementor will write enough to
+  satisfy the existing tests and (in theory at least) nothing
+  more. Hence the importance of the tests in specifying the system, and
+  so the importance of ﬁnding mechanisms by which the tests can be
+  validated in some independent way. In Section 5 we compare our
+  approach to others in the TDD community.
+
+
 * EUnit
+
+  EUnit provides a framework for deﬁning and executing unit tests,
+  which test that a particular program unit – in Erlang, a function or
+  collection of functions – behaves as expected. The framework gives a
+  representation of tests of a variety of different kinds, and a set of
+  macros which simplify the way EUnit tests can be written.  
+
+  For a function without side-effects, a test will typically look at
+  whether the input/output behaviour is as expected, and that
+  exceptions are raised (only) when required.
+  
+  Functions that have side-effects require more complex support.
+
+  The infrastructure needed to test these programs (called a ﬁxture)
+  includes a facility to setup a particular program state prior to
+  test, and then to cleanup after the test has been performed.  
+
 
 * Grammar and state machine inference
 
+  The tool extracts a ﬁnite state machine from sets of positive and
+  negative instances. That is, the user provides sets of words which
+  are in (resp. out) of the language of the state machine, and grammar
+  inference techniques are used to infer the minimal machine
+  conforming to this requirement.
+
+  The algorithm uses a state merging technique: ﬁrst the (ﬁnite)
+  machine accepting exactly the positive cases is constructed, then
+  states are merged in such a way that no positive and negative states
+  are identiﬁed. The particular implementation assumes that the language
+  accepted is preﬁx-closed, so that in terms of testing a single
+  positive case can be seen as representing a number of positive unit
+  tests. Further details of the algorithm are in BlueFringe chapter.
+
 * PropErl
 
+  PropEr is a tool for the automated, semi-random, property-based
+  testing of Erlang programs. It is fully integrated with Erlang's
+  type language, and can also be used for the model-based random
+  testing of stateful systems.
+
+  PropErl supports random testing of Erlang programs.  Properties of
+  the programs are stated in a subset of ﬁrst-order logic, embedded in
+  Erlang syntax. PropErl verifies these properties for collections
+  of Erlang data values generated randomly, with user guidance in
+  defining the generators where necessary.
+
+  PropErl comes with a library (properl_fsm) for specifying test
+  cases as ﬁnite state machines. For each state in the FSM it is
+  necessary to describe a number of things.
+
+  - The possible transitions to other states.
+  - A set of preconditions for each transition.
+  - How to actually perform the transition (that is, a function that
+    performs whatever operations are necessary).
+  - Postconditions to make a check after the state transition.
+  - A description of the changes on the state as a result of the
+    transition.
 
 
+* END

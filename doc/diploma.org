@@ -5,7 +5,7 @@
 #+OPTIONS:   H:3 num:t toc:t \n:nil @:t ::t |:t ^:nil -:t f:t *:t <:t
 #+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil tags:not-in-toc
 #+DESCRIPTION: Augment design process with system property discovering aid.
-#+KEYWORDS: SmallCell, 
+#+KEYWORDS: SmallCell,
 #+LANGUAGE: en
 
 #+STYLE: <link rel="stylesheet" type="text/css" href="org-manual.css" />
@@ -21,7 +21,7 @@
 * Abstract
 
      This development uses xUnit and Property-based testing to make two
-     contributions.  
+     contributions.
 
      First we augment design process with system property discovering aid,
      that provides feedback and guide developer from formal specification
@@ -37,30 +37,16 @@
 
     In this paper we show how finite state machines can be
     automatically extracted from sets of unit tests - here Eunit tests
-    for Erlang programs. We use these FSMs in two ways. 
+    for Erlang programs. We use these FSMs in two ways.
 
     First, they can in themselves provide feedback on the adequacy of
     a set of tests, independently of any implementation.
-      
 
     Secondly, they can be transformed and used within PropErl to guide
     the random generation of test sequences for state-based systems.
 
-  
-** Test-driven Development
 
-   Test-Driven Development (TDD), a practice suggesting that tests
-   should be the driving force in software creation, is very popular
-   within the Erlang community. Testing is used in all phases of
-   software development to reveal software discrepancies, or increase
-   confidence about their absence. TDD calls for automating the test
-   process as much as possible, in an attempt to produce concise and
-   reusable test suites that can accomplish a thorough testing of the
-   system under test. Unit testing frameworks (e.g. EUnit for Erlang)
-   are commonly used towards this direction, since they can
-   automatically execute large test suites and capture related
-   output. Nevertheless, it is the user’s manual task to provide valid
-   test input and decide on the correctness of the output.
+** Test-driven Development
 
    The process of testing a single function can be conceptually
    divided into three steps:
@@ -70,9 +56,19 @@
    3. Decide if the input-output pair conforms to the function’s
       intended behaviour (also known as the “oracle problem").
 
-** Implementing Actor model with Erlang
+   Under this approach, how can we validate the system? It will surely
+   meet the tests, because it has been developed precisely to pass
+   them.  The question becomes one of validating the tests
+   themselves. In this paper we propose that during TDD of state-based
+   systems we can validate the tests by extracting the ﬁnite state
+   machine (FSM) implicit in the current test set.
+
    
+
+** Implementing Actor model with Erlang
+
 *** Actor model
+    
     Actor are part of multi-agent system is a computerized system
     composed of multiple interacting intelligent agents within an
     environment. Multi-agent systems can be used to solve problems
@@ -114,7 +110,7 @@
         the information necessary to build and run a system. Internally a
         release consists of zero or more applications.
 
-     2. Applications 
+     2. Applications
 
         Applications are simpler than releases, they contain all the
         code and operating procedures necessary to implement some
@@ -139,30 +135,43 @@
         which perform computations, that is, they do the actual work.
 
 ** Testing state-based systems
+   
+   The FSM is extracted by means of grammar inference over sets of
+   positive and negative traces. This FSM provides feedback on the
+   tests independently of any implementation, and thus ‘triangulates’
+   the process.  We would argue that that makes the process of
+   test-driven development more robust. In particular, it allows us to
+   give an answer to the question “When have I written enough tests?”
+   on the basis of the tests alone, rather than by examining an
+   implementation.
 
-    In particular we seek to develop PropErl properties from sets of
-    unit tests, thus providing a migration path from traditional unit
-    testing to property-based testing. To test state-based systems in
-    PropErl it is usual to develop a state machine model (using proper_fsm
-    or proper_statem) which encapsulates the permissible sequences of API
-    calls.
+   We illustrate our approach to TDD by working through a case study
+   in Erlang, developing unit tests in EUnit, and using observations
+   to extract a series of FSMs from the test suite as it evolves.
 
-    We show how the FSM extracted from a set of unit tests can be
-    transformed into a PropErl FSM, and thus how a set of unit tests
-    can be combined into a property. This has the benefit of allowing
-    the system to be tested on many more inputs, namely all those
-    permissible in the FSM, and a selection of these can be generated
-    randomly using PropErl generators.
+   In particular we seek to develop PropErl properties from sets of
+   unit tests, thus providing a migration path from traditional unit
+   testing to property-based testing. To test state-based systems in
+   PropErl it is usual to develop a state machine model (using proper_fsm
+   or proper_statem) which encapsulates the permissible sequences of API
+   calls.
+
+   We show how the FSM extracted from a set of unit tests can be
+   transformed into a PropErl FSM, and thus how a set of unit tests
+   can be combined into a property. This has the benefit of allowing
+   the system to be tested on many more inputs, namely all those
+   permissible in the FSM, and a selection of these can be generated
+   randomly using PropErl generators.
 
 
 ** Roadmap
-   
+
    We begin by discussing the background to this work.
    We first introduce test-driven development, and then discuss
    EUnit and PropErl for testing Erlang systems. We also look
    at grammar inference as a mechanism for inferring finite-state
    machines from sets of words in the language and its complement.
-   
+
    We use visualization and test adjustment to do FSM inference in our
    case study.
 
@@ -179,7 +188,7 @@
    inferred in the previous section, and we discuss the process of
    building the Protocol machine from this FSM with a view to automating
    the process as much as possible in the future.
-   
+
 
 * [[file:background.org][Software Testing Background]]
 
@@ -196,16 +205,16 @@
   a simple server.
 
 * [[file:workflow.org][Design Workflow]] (Examples)
-  
+
   In this section we present bunch of examples of out method in
   action. Last example (tradepost) illustrate augment design process
   with system property discovering aid.
-
+url =
 
 * Practical application
 
 ** CPE WAN Management Protocol
-   
+
    CWMP is a text based protocol. Orders sent between the device (CPE)
    and auto configuration server (ACS) are transported over HTTP (or
    more frequently HTTPS). At this level (HTTP) CPE is behaving in the
@@ -222,18 +231,18 @@
    | cpe_cwmpc | https://github.com/ibnHatab/cpe_cwmpc.git | Protocol    |
    | cpe_host  | https://github.com/ibnHatab/cpe_host.git  | Host utils  |
    | cwmp      | https://github.com/ibnHatab/cwmp.git      | Encoder     |
-   
+
 
 ** [[file:cwmp_testing.org][CWMP Client Application Testing]]
 
 
 
-* Acceptance Test  
+* Acceptance Test
 ** Fitness
    TODO or not TODO ???
-   
-* Conclusion and future work 
-  
+
+* Conclusion and future work
+
 
 * Bibliography
 
