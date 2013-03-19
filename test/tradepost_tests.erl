@@ -16,7 +16,7 @@
 %% V.0 unitary test
 %% @end
 %%--------------------------------------------------------------------
-fsm_tradepost_test_() ->
+fsm_tradepost_test_no() ->
     {foreach,
      fun ()  -> start_tp()end,
      fun (_) -> stop_tp() end,
@@ -43,111 +43,93 @@ fsm_tradepost_test_() ->
 		  {loopdata, is, [playstation, undefined, seller_password, undefined,undefined]},
 		  {call, tradepost, withdraw_item, [which_tp(), seller_password], ok},
 		  {state, is, ready},
-		  
+
 		  {call, tradepost, seller_insertitem, [which_tp(), playstation, seller_password], ok},
 		  {state, is, item_received}
-
-		  
 		 ])
      ]
     }.
 
 %%--------------------------------------------------------------------
 %% @doc
-%% Design Proofing with FSM Unitary tests 
+%% Design Proofing with FSM Unitary tests
 %% V.1 fsm unitary test for Gramma Inference using positive and negative tests
 %% @end
 %%--------------------------------------------------------------------
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% -define(VZTEST, true).
--ifdef(VZTEST).
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-%% + start stop start stop
-start_stop_start_test_() ->
+pos_start_stop_start_stop_test_() ->
     {inorder,
      [ ?_assertMatch(true,start_tp()),
        ?_assertMatch(ok,stop_tp()),
        ?_assertMatch(true,start_tp()),
        ?_assertMatch(ok,stop_tp())
-      ]}. 
+      ]}.
 
-%% - unregister stop
-stopFirst_test_() ->
-    [
-    ?_assertError(badarg,stop_tp()),
-    ?_assertError(badarg,stop_tp())
-    ].
+neg_stop_test_() -> ?_assertError(badarg,stop_tp()).
 
-%% - start start
-startTwice_test_() ->
-      [{setup,
-	fun ()  -> start_tp () end,
-	fun (_) -> stop_tp() end,
-	?_assertError(badarg,start_tp())
-   }].
-
-%% - identify
-identify_test() ->
-    ?assertExit({noproc,{gen_fsm,sync_send_event,_}},
- 		tradepost:seller_identify_tp(seller_password)).
-
-%% + start identify stop
-identify_stop_test_()->
+neg_startTwice_test_() ->
     {setup,
-     fun() -> start_tp() end,
+     fun() -> ok end,
      fun(_) -> stop_tp() end,
-     ?_assertMatch(ok,seller_identify_tp(seller_password))
+     [
+      ?_assertMatch(true, start_tp()),
+      ?_assertError(badarg, start_tp())
+     ]
     }.
 
-%% - start insertitem
-insertitem_test_() ->
+pos_start_identify_stop_test_()->
     {setup,
      fun() -> start_tp() end,
      fun(_) -> stop_tp() end,
-      ?_assertExit(error,
+     ?_assertMatch(ok, seller_identify_tp(seller_password))
+    }.
+
+pos_start_identify_insert_test_()->
+    {setup,
+     fun() -> start_tp() end,
+     fun(_) -> stop_tp() end,
+     [
+      ?_assertMatch(ok, seller_identify_tp(seller_password)),
+      ?_assertMatch(ok, seller_insertitem_tp(playstation,seller_password))
+     ]}.
+
+neg_start_insertitem_test_() ->
+    {setup,
+     fun() -> start_tp() end,
+     fun(_) -> stop_tp() end,
+     ?_assertExit(error,
       		   case seller_insertitem_tp(playstation,seller_password) of
       		       error -> exit(error); Other -> Other end)
     }.
 
+neg_start_withdraw_test_() ->
+    {setup,
+     fun() -> start_tp() end,
+     fun(_) -> stop_tp() end,
+     ?_assertExit(error,
+		  case withdraw_item_tp(seller_password) of
+		      error -> exit(error); Other -> Other end)
+    }.
 
-%% + start identify insertitem withdraw insertitem
-identify_recall_item_test_()->
+neg_identify_withdraw_test_()->
     {setup,
      fun() -> start_tp() end,
      fun(_) -> stop_tp() end,
      [
-      ?_test(
-	 begin
-	     ?assertMatch(ok, seller_identify_tp(seller_password)),
-	     ?assertMatch(ok, tradepost:seller_insertitem_tp(playstation,seller_password)),
-	     ?assertMatch(ok, tradepost:withdraw_item_tp(seller_password)),
-	     ?assertMatch(ok, tradepost:seller_insertitem_tp(playstation,seller_password))
-	 end
-	)]}.    
-      
+      ?_assertMatch(ok, seller_identify_tp(seller_password)),
+      ?_assertError(value,
+		    case withdraw_item_tp(seller_password) of
+			error ->  .error(value); Other -> Other end)
+     ]}.
 
-%% - start identify insertitem withdraw withdraw 
-identify_withdraw_twice_test_()->
+pos_identify_insert_withdraw_twice_test_()->
     {setup,
      fun() -> start_tp() end,
      fun(_) -> stop_tp() end,
      [
-      ?_test(
-	 begin
-	     ?assertMatch(ok, seller_identify_tp(seller_password)),
-	     ?assertMatch(ok, tradepost:seller_insertitem_tp(playstation,seller_password)),
-	     ?assertMatch(ok, tradepost:withdraw_item_tp(seller_password)),
-	     ?assertError(value,
-			  case tradepost:withdraw_item_tp(seller_password) of
-			      error ->  .error(value); Other -> Other end
-			 )
-	 end
-	)]}.    
-      
+      ?_assertMatch(ok, seller_identify_tp(seller_password)),
+      ?_assertMatch(ok, seller_insertitem_tp(playstation,seller_password)),
+      ?_assertMatch(ok, withdraw_item_tp(seller_password)),
+      ?_assertMatch(ok, seller_insertitem_tp(playstation,seller_password)),
+      ?_assertMatch(ok, withdraw_item_tp(seller_password))
+     ]}.
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
--endif.						% VZTEST
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

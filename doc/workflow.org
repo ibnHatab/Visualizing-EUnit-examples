@@ -65,16 +65,26 @@
 #+results:
 [[file:design_flow.png]]
 
- 
    This provides feedback and guide developer from formal specification
    to the exact component design.
 
-   Usage of examples
-   make
-   utest  (ut-shell)
-   vztest
-   eqctest
-   eqcunit
+** Examples  
+   
+   Usage of examples:
+   - build modules and test suite
+     :  make
+
+   - run unitary tests
+     : make utest  (ut-shell)
+
+   - Visualize infered gramma as FSM
+     : make vztest
+
+   - Run peoperty based test
+     : make eqctest
+
+   - Run stohastic test
+     : make eqcunit
 
 *** Example: locker
 **** Desc:  [[http://pdincau.wordpress.com/2010/09/07/an-introduction-to-gen_fsm-behaviour/][An introduction to gen_fsm behaviour]]
@@ -162,6 +172,7 @@
      
      [[file:two_frequencies_eqc.jpg]]
 
+
 *** Example: creature
 **** Desc: [[http://proper.softlab.ntua.gr/Tutorials/PropEr_testing_of_finite_state_machines.html][PropEr testing of finite state machines]]
      Consider the following state diagram that describes the life of a
@@ -190,6 +201,7 @@
 **** QuickCheck FSM generator (make eqctest eqcunit)
      
      [[file:creature_eqc.jpg]]
+
 
 *** Example: tradepost
     This example demonsteates how gramma inference can be used to
@@ -259,3 +271,44 @@
       state where saler identifies self if lurking in FSM context.
       
       Our next task is to make it explicit in Version 1.0
+      
+**** Version One
+     In the new version we make saller indentified state implicit and call it 'ready.
+
+     New set of positive and negative tests was derived:
+
+     #+begin_src erlang
+%%--------------------------------------------------------------------
+%% @doc
+%% Design Proofing with FSM Unitary tests
+%% V.1 fsm unitary test for Gramma Inference using positive and negative tests
+%% @end
+%%--------------------------------------------------------------------
+pos_start_stop_start_stop_test_() ->
+..
+neg_stop_test_() ->
+..
+neg_startTwice_test_() ->
+..
+pos_start_identify_stop_test_()->
+..
+pos_start_identify_insert_test_()->
+..
+neg_start_insertitem_test_() ->
+..
+neg_start_withdraw_test_() ->
+..
+neg_identify_withdraw_test_()->
+..
+pos_identify_insert_withdraw_twice_test_()->
+..
+     #+end_src
+
+     [[file:tracepost-v.1_fsm.jpeg]]
+
+     No automata corresponds our expectation. 
+
+     There are extra `stop_tp transaction which doesn't belong here
+     and exist because test suite cleanup code. More generally Erlang
+     gen_fsm and gen_server designed to run forewer and normaly stoped
+     only by crash.

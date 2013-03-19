@@ -51,6 +51,8 @@
 		 ]}.
 #+end_src    
 
+*** CI Test Result 
+
     [[file:TestResult.png]]
 
 **** Builder Suite
@@ -77,44 +79,8 @@
      | build_DUStateChangeCompleteResponse_tc           |             |
      | build_FactoryReset_tc                            |             |
      | build_FactoryResetResponse_tc                    |             |
-     | build_Fault_tc                                   |             |
-     | build_GetAllQueuedTransfers_tc                   |             |
-     | build_GetAllQueuedTransfersResponse_tc           |             |
-     | build_GetOptions_tc                              |             |
-     | build_GetOptionsResponse_tc                      |             |
-     | build_GetParameterAttributes_tc                  |             |
-     | build_GetParameterAttributesResponse_tc          |             |
-     | build_GetParameterNames_tc                       |             |
-     | build_GetParameterNamesResponse_tc               |             |
-     | build_GetParameterValues_tc                      |             |
-     | build_GetParameterValuesResponse_tc              |             |
-     | build_GetQueuedTransfers_tc                      |             |
-     | build_GetQueuedTransfersResponse_tc              |             |
-     | build_GetRPCMethods_tc                           |             |
-     | build_GetRPCMethodsResponse_tc                   |             |
-     | build_Inform_tc                                  |             |
-     | build_InformResponse_tc                          |             |
-     | build_Kicked_tc                                  |             |
-     | build_KickedResponse_tc                          |             |
-     | build_Reboot_tc                                  |             |
-     | build_RebootResponse_tc                          |             |
-     | build_RequestDownload_tc                         |             |
-     | build_RequestDownloadResponse_tc                 |             |
-     | build_ScheduleDownload_tc                        |             |
-     | build_ScheduleDownloadResponse_tc                |             |
-     | build_ScheduleInform_tc                          |             |
-     | build_ScheduleInformResponse_tc                  |             |
-     | build_SetParameterAttributes_tc                  |             |
-     | build_SetParameterAttributesResponse_tc          |             |
-     | build_SetParameterValues_tc                      |             |
-     | build_SetParameterValuesResponse_tc              |             |
-     | build_SetVouchers_tc                             |             |
-     | build_SetVouchersResponse_tc                     |             |
-     | build_TransferComplete_tc                        |             |
-     | build_TransferCompleteResponse_tc                |             |
-     | build_Upload_tc                                  |             |
-     | build_UploadResponse_tc                          |             |
 
+     And o on ...
 
 ***** Test results
       [[file:BuilderTestResult.png]]

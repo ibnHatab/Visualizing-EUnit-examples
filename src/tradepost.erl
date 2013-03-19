@@ -89,7 +89,6 @@ ready({identify_seller,Password},_Frm,LoopD = #state{seller=Password}) ->
     {reply,ok,ready,LoopD};
 ready({identify_seller,_},_,LoopD) ->
     {reply,error,ready,LoopD};
-
 ready({insert,Item,Password},_Frm,LoopD = #state{seller=Password}) ->
     {reply,ok,item_received,LoopD#state{object=Item}};
 ready({insert,_,_},_Frm,LoopD) ->
@@ -100,6 +99,8 @@ ready({withdraw,_},_Frm,LoopD) ->
 item_received({withdraw,Password},_Frm,LoopD = #state{seller=Password}) ->
     {reply,ok,ready,LoopD#state{object=undefined}};
 item_received({withdraw,_},_Frm,LoopD) ->
+    {reply,error,item_received,LoopD};
+item_received({insert,_,_},_Frm,LoopD) ->
     {reply,error,item_received,LoopD}.
 
 %%--------------------------------------------------------------------
