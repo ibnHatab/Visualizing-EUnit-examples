@@ -13,7 +13,7 @@
 %%--------------------------------------------------------------------
 %% @doc
 %% Test tradepost API via FSM inspection mechanism
-%% V.0 unitary test
+%% V.1 unitary test
 %% @end
 %%--------------------------------------------------------------------
 fsm_tradepost_test_no() ->

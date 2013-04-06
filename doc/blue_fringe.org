@@ -18,10 +18,154 @@
 #+TITLE: Augmented Test-driven Development and Property Inference 
 
 
-* BlueFringe (+/- tests) 
+* Introduction
+  We use the QSM algorithm to infer state machines from sets of
+  positive and negative traces derived from the test suite.
 
-* Examples discovery and feedback
+* Test using QSM
+  We were unable to access the source code of the existing querydriven
+  state merging (QSM) implementation.
 
-* Example guided development (tradepost)
+  We describe how an implementation of the QSM algorithm is used to reverse engineer software.
+
+  The algorithm works in terms of regular languages, when using it to
+  reverse-engineer a program, we will consider traces (execution
+  sequences) as words in the language. The QSM algorithm takes two
+  sets of words, one set of words from the language – valid sequences
+  of events – and one of words that do not belong to the language –
+  invalid sequences . With one peculiarity, invalid sequences are
+  invalid strictly because of its last symbol, thus, if we remove the
+  last event from an invalid word, we should get a valid one. This
+  corresponds to an implementation raising an exception as last action
+  in a trace. There is no point in considering what happens after the
+  exception is thrown. From the input consisting in two sets of words,
+  QSM will try to produce the most general automaton that complies
+  with the traces, and this will hopefully give us an idea of the
+  completeness of our tests.
+
+  In this section we will use this set as example:
+  
+  | Type     | Trace     |
+  |----------+-----------|
+  | Positive | [a,b,a]   |
+  | Positive | [b,b,a,b] |
+  | Negative | [a,b,c,c] |
+
+  [[file:initial-apta.png]]
+
+  Figure 1. Initial APTA
+
+  The QSM algorithm roughly consists of two phases. In the first one,
+  called /initialization/, we create a finite state machine with a
+  tree structure, the Augmented Prefix Tree Acceptor (APTA) that will
+  accept all positive traces and reject all negative ones. In the
+  second phase, /state merging/, we merge nodes of the tree in order
+  to get a smaller finite state machine which is still deterministic
+  and accepts and rejects the initial sets of positive and negative
+  traces.
+
+** Initialization
+   
+   The Augmented Prefix Tree Acceptor is the tree that we will use as
+   our initial FSM. It must necessarily have a tree shape, it must accept
+   all positive traces and reject all negative traces and it must also be
+   deterministic (this is, there cannot be two branches with the same
+   symbol departing from the same node). For example, from the previous
+   traces we would get the APTA in Figure 1 in which 0 is the initial
+   state and 8 is a failing one.
+
+   In order to generate this in Erlang we create an initial state with
+   all the traces in it and extract the first event from each
+   trace. Then we create as many states as different events we
+   extracted and divide the rests of the traces between the new
+   states.
+   
+   In the first iteration of our example we would get:
+   
+   | State      | Kind of trace | New trace |
+   |------------+---------------+-----------|
+   | 1 (from a) | Positive      | [b, a]    |
+   | 1 (from a) | Negative      | [b, c, c] |
+   | 2 (from b) | Positive      | [b, a, b] | 
+
+
+   We repeat the process with every new generated state until the
+   states we generate do not contain traces. When we arrive to the end
+   of a positive trace we just remove the trace, but when we fetch the
+   last event of a failing trace we generate a new failing state and
+   check that there are no traces left to expand from that state.
+
+   The target is to obtain the automaton as a record with the fields:
+   initial state, alphabet, states, transitions and failing states.
+
+** State machine merging
+
+   Now we generalize the FSM by merging states. To merge two
+   states we just move the transitions from one state to the other. For
+   example, if we merge in the APTA above the states 1 and 2 we get
+   the machine illustrated in Figure 2.
+
+   [[file:state-merging-stage1.png]]
+
+   Figure 2. State machine merging: stage 1
+
+   If non-determinism appears we continue merging, 3 with 4, then
+   5 with 7 and we would get the machine illustrated in Figure 3.
+
+   After merging, we check that the original traces are still valid.
+   If any trace is lost we undo the merge. In our implementation this
+   is done by throwing an exception which interrupts the merging when
+   this happens.
+
+   [[file:state-merging-stage-2.png]]
+
+   Figure 3. State machine merging: stage 2
+
+
+   To decide which nodes should be merged first we use the
+   /bluefringe/ strategy. This strategy consists in considering two
+   zones of the FSM. The red zone has the nodes that cannot be reduced
+   and the blue zone has the immediate neighbours, which will be used
+   as candidates to merge with the red zone.
+
+   [[file:state-merging-stage-3.png]]
+
+   Figure 4. State machine merging: stage 3
+
+   We start setting the initial state as red and its neighbours as
+   blue. At each step we compute the score for every possible pair of
+   candidates to merge, (pairs consisting on one node from the red
+   zone and one node from the blue zone). The score for a pair of
+   candidates is given by the number of extra merges that we would be
+   forced to carry out in order to restore determinism after
+   hypothetically merging that pair itself.
+   
+   | Pair  | (0, 1) | (0, 2) |
+   |-------+--------+--------|
+   | Score |      1 |      3 |
+
+   
+
+*** Merging rules
+
+    - Two states are incompatible if one of them is a failing state,
+      and the other is not. If a pair of candidates is incompatible or
+      if it forces us to make an incompatible merge (in order to
+      restore determinism) its score will be -1.
+
+    - We must also check that all the positive traces are accepted and
+      all the negative traces are rejected before actually committing
+      any merge.
+
+    - If a blue node cannot be merged with any of the red nodes, it
+      becomes red and the blue zone is updated accordingly to match all
+      the immediate neighbours of the new red zone.
+
+      
+    The process ends when the whole FSM is red and we wrap up
+    by merging all the failing states in one. This last merging should not
+    produce indeterminism since there should not be transitions starting
+    in any failing state
+      
 
 * END

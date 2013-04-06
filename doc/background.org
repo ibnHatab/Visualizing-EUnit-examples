@@ -5,7 +5,7 @@
 #+OPTIONS:   H:3 num:t toc:t \n:nil @:t ::t |:t ^:nil -:t f:t *:t <:t
 #+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil tags:not-in-toc
 #+DESCRIPTION: Augment design process with system property discovering aid.
-#+KEYWORDS: SmallCell, 
+#+KEYWORDS: SmallCell,
 #+LANGUAGE: en
 
 #+STYLE: <link rel="stylesheet" type="text/css" href="org-manual.css" />
@@ -40,17 +40,144 @@
   which test that a particular program unit – in Erlang, a function or
   collection of functions – behaves as expected. The framework gives a
   representation of tests of a variety of different kinds, and a set of
-  macros which simplify the way EUnit tests can be written.  
+  macros which simplify the way EUnit tests can be written.
+
+
+#+begin_src erlang
+
+%%% File    : cpe_util.erl
+%%% Description : Miscellaneous utilities for protocol processing.
+
+%% This function extracts and validates the connect options from opption list.
+-spec validate_options(list(Option),  list(Validator)) -> list(Option) when
+      Option    :: {Key :: atom(),
+		    Valie :: term()},
+      Validator :: {Key :: atom(),
+		    Validate :: fun((term()) -> true | false),
+		    Mandatory :: true | false,
+		    Default :: term()}.
+validate_options(Options, ValidOptions) ->
+
+    %% Validate in Options against validation template
+    CheckedUpOptions =
+	lists:foldl(fun({Key, Value}, AccOption) ->
+			    case lists:keysearch(Key, 1, ValidOptions) of
+				{value, {Key, Validate, _, Default}} ->
+				    case (catch Validate(Value)) of
+					true ->
+					    [{Key, Value} | AccOption];
+					_ ->
+					    ?hostrt("validate_options -> check - reject",
+						    [{default, Default}]),
+					    throw({error, {Key, Value}})
+				    end;
+				false ->
+				    ?hostrt("validate_options -> unknown - ignore",
+					    [{key, Key}]),
+				    AccOption
+			    end
+		    end, [], Options),
+    %% Check if any mandatory options are missing! (Throw reason)
+    [case lists:keysearch(Key, 1, CheckedUpOptions) of
+	 {value, _} -> ok;
+	 _ ->
+	     ?hostrt("validate_options -> missing - mandatory",
+		     [{key, Key}]),
+	     throw({error, Reason})
+     end || {Key, _, true, Reason} <- ValidOptions],
+
+    CheckedUpOptions.
+
+#+end_src
+
+  Source 1: Example of pure finction.
 
   For a function without side-effects, a test will typically look at
   whether the input/output behaviour is as expected, and that
   exceptions are raised (only) when required.
-  
+
+
+#+begin_src erlang
+%% ===================================================================
+%% EUnit tests
+%% ===================================================================
+-ifdef(TEST).
+-include_lib("eunit/include/eunit.hrl").
+
+is_arch_test() ->
+    ?assert(is_arch (linux)).
+
+validate_options_null_test() ->
+    Option = {op1, "value1"},
+    Option2 = {op2, "value2"},
+    ValidTemplate = {op1, fun(_Any) -> true end, false, default},
+    InvalidTemplate = {op1, fun(_Any) -> false end, false, default},
+    MandatoryTemplate = {op1, fun(_Any) -> true end, true, missing},
+
+    %% Emmty option list
+    ?assertMatch([], validate_options([], [])),
+    ?assertMatch([], validate_options([], [ValidTemplate])),
+    ?assertMatch([], validate_options([], [InvalidTemplate])),
+    ?assertException(throw, {error, missing}, validate_options([], [MandatoryTemplate])),
+
+
+    ?assertMatch([Option], validate_options([Option], [ValidTemplate])),
+    ?assertMatch([], validate_options([Option2], [InvalidTemplate, ValidTemplate])),
+
+    ?assertException(throw, {error,{op1,"value1"}},
+    		     validate_options([Option2, Option, {op3, ""}], [InvalidTemplate])),
+
+    ?assertException(throw, {error, missing},
+     		     validate_options([Option2], [MandatoryTemplate])),
+    ok.
+
+-endif.
+#+end_src
+
+  Source 2: Unit Test for function without side-effects
+
   Functions that have side-effects require more complex support.
 
   The infrastructure needed to test these programs (called a ﬁxture)
   includes a facility to setup a particular program state prior to
-  test, and then to cleanup after the test has been performed.  
+  test, and then to cleanup after the test has been performed.
+
+#+begin_src erlang
+
+%%--------------------------------------------------------------------
+%% MOCK for RPC Client and HTTP Session
+%%--------------------------------------------------------------------
+client_mock_set() ->
+    ok = meck:new(cwmp),
+    meck:expect(cwmp, confirm, fun(_Data) -> 'ok' end),
+    meck:expect(cwmp, indication, fun(_Data) -> 'ok' end).
+
+client_mock_unset() ->
+    true = meck:validate(cwmp),
+    meck:unload(cwmp).
+
+
+http_session_mock_set() ->
+    ok = meck:new(cwmp_http_session),
+    meck:expect(cwmp_http_session, push, fun(_Data) -> 'ok' end).
+
+http_session_mock_unset() ->
+    true = meck:validate(cwmp_http_session),
+    meck:unload(cwmp_http_session).
+
+rpc_session_mock_test_() ->
+    {setup,
+     fun() -> client_mock_set(), http_session_mock_set()  end,
+     fun(_) -> client_mock_unset(), http_session_mock_unset() end,
+     [
+      ?_assertMatch(ok, cwmp:confirm({})),
+      ?_assertMatch(ok, cwmp:indication({})),
+      ?_assertMatch(ok, cwmp_http_session:push({}))
+     ]
+    }.
+
+#+end_src
+  Source 3: Mock for /cwmp/ client and /cwmp_http_session/.
 
 
 * Grammar and state machine inference
@@ -61,6 +188,14 @@
   inference techniques are used to infer the minimal machine
   conforming to this requirement.
 
+  [[file:irreducible-automaton.png]]
+
+  Figure 1. State machine
+
+  [[file:alternative-apta.png]]
+
+  Figure 2. APTA
+
   The algorithm uses a state merging technique: ﬁrst the (ﬁnite)
   machine accepting exactly the positive cases is constructed, then
   states are merged in such a way that no positive and negative states
@@ -69,7 +204,8 @@
   positive case can be seen as representing a number of positive unit
   tests. Further details of the algorithm are in BlueFringe chapter.
 
-* PropErl
+
+* PropEr
 
   PropEr is a tool for the automated, semi-random, property-based
   testing of Erlang programs. It is fully integrated with Erlang's
@@ -94,5 +230,25 @@
   - A description of the changes on the state as a result of the
     transition.
 
+    [[file:creature.png]]
+
+  Figure 2. Automaton from example section
+
+#+begin_src erlang
+prop_doesnt_run_out_of_supplies() ->
+    ?FORALL(Cmds, proper_fsm:commands(?MODULE),
+            begin
+                start(cheese_day), %% could also be grapes_day or lettuce_day,
+                                   %% but the same kind of day should be used
+                                   %% to initialize the model state
+                {History, State, Result} = proper_fsm:run_commands(?MODULE, Cmds),
+                stop(),
+                ?WHENFAIL(io:format("History: ~w\nState: ~w\nResult: ~w\n",
+                                    [History, State, Result]),
+                          Result =:= ok)
+            end).
+#+end_src
+
+  Source 3: Properties of creature that feeds on cheese, grapes and lettuce.
 
 * END

@@ -201,15 +201,14 @@
 
   In this section we introduce a procedure for systematically
   developing the unit tests that are used in the test-driven development
-  process of systems. This is illustrated through the running example of
-  a simple server.
+  process of systems.
 
 * [[file:workflow.org][Design Workflow]] (Examples)
 
   In this section we present bunch of examples of out method in
   action. Last example (tradepost) illustrate augment design process
   with system property discovering aid.
-url =
+
 
 * Practical application
 
@@ -233,11 +232,15 @@ url =
    | cwmp      | https://github.com/ibnHatab/cwmp.git      | Encoder     |
 
 
-** [[file:cwmp_testing.org][CWMP Client Application Testing]]
+** TODO CWMP Application Usage
+   This is illustrated through the running example of a simple server.
+
+** [[file:cwmp_testing.org][CWMP Protocol Testing]]
 
 
 
-* Acceptance Test
+* DONE Acceptance Test
+  CLOSED: [2013-04-06 Sat 12:16]
 ** Fitness
    TODO or not TODO ???
 
@@ -246,6 +249,20 @@ url =
 
 * Bibliography
 
+  1. P. Dupont, B. Lambeau, C. Damas, and A. van Lamsweerde. The QSM
+     algorithm and its application to software behavior model
+     induction. Applied Artificial Intelligence, 22(1):77–115, 2008.
+  2. T. Arts and S. Thompson. From test cases to FSMs: augmented
+     testdriven development and property inference. In Proceedings of
+     the 9th ACM SIGPLAN workshop on Erlang, pages 1–12. ACM, 2010.
+  3. K. Beck. Test-driven development: by example. Addison-Wesley
+     Professional, 2003.
+  4. N. Walkinshaw, K. Bogdanov, M. Holcombe, and
+     S. Salahuddin. Reverse engineering state machines by interactive
+     grammar inference. In Working Conference on Reverse Engineering,
+     pages 209–218, 2007.
+
+* Software 
    | Module                     | URI                                                        |
    |----------------------------+------------------------------------------------------------|
    | Visualizing-EUnit-examples | https://github.com/ibnHatab/Visualizing-EUnit-examples.git |
