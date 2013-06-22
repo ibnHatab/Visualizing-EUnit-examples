@@ -31,6 +31,8 @@ docs:
 	@erl -noshell -run edoc_run application '$(APP)' '"."' '[]'
 
 SUT ?= tradepost
+# frequency
+# tradepost
 SUITE=$(SUT)_tests
 utest: app
 	$(REBAR) -v eunit skip_deps=true suite=$(SUITE)

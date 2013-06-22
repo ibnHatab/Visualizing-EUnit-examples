@@ -49,7 +49,7 @@ fsm_tradepost_test_no() ->
 		 ])
      ]
     }.
-
+ 
 %%--------------------------------------------------------------------
 %% @doc
 %% Design Proofing with FSM Unitary tests
@@ -118,7 +118,7 @@ neg_identify_withdraw_test_()->
       ?_assertMatch(ok, seller_identify_tp(seller_password)),
       ?_assertError(value,
 		    case withdraw_item_tp(seller_password) of
-			error ->  .error(value); Other -> Other end)
+			error ->  error(value); Other -> Other end)
      ]}.
 
 pos_identify_insert_withdraw_twice_test_()->
